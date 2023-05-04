@@ -149,5 +149,4 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-Edit foodgram/settings.py. Rm default comments. Update ALLOWED_HOSTS, INSTALLED_APPS. Connect to PostgreSQL. Set LANGUAGE_CODE, TIME_ZONE. Add static and media url and root. Set REST_FRAMEWORK and SIMPLE_JWT congif'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
