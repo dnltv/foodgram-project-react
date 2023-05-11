@@ -88,3 +88,28 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Recipe'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_favorite_user_recipe'
+            )
+        ]
+        verbose_name = 'Favorites Object'
+        verbose_name_plural = 'Favorite Objects'
