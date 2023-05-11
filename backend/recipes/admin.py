@@ -13,7 +13,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name', 'text', 'ingredients', 'slug', 'pub_date')
+    list_display = ('author', 'name', 'text', 'slug', 'pub_date')
     search_fields = ('author', 'name', 'text', 'ingredients', 'slug', 'pub_date')
     list_filter = ('author', 'name', 'text', 'ingredients', 'slug', 'pub_date')
     empty_value_display = '-empty-'
