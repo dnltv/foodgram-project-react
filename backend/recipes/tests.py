@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..recipes.models import Recipe, Ingredient, RecipeIngredient, Favorite
+from ..recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient
 from ..users.models import User
 
 
