@@ -41,7 +41,7 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='recipes',
-        verbose_name='Автор'
+        verbose_name='Author'
     )
     name = models.CharField(max_length=200, verbose_name='Name of the recipe')
     text = models.TextField(verbose_name='Text')
@@ -57,7 +57,7 @@ class Recipe(models.Model):
         auto_now=True,
         db_index=True
     )
-    objects = 'RecipeQuerySet'.as_manager()
+    objects = RecipeQuerySet.as_manager()
 
     class Meta:
         ordering = ('-pub_date', )
@@ -67,3 +67,24 @@ class Recipe(models.Model):
     def __str__(self):
         return self.name
 
+
+class RecipeIngredient(models.Model):
+    """A model representing """
+    amount = models.PositiveIntegerField(verbose_name='Amount')
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Ingredient'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Recipe'
+    )
+
+    class Meta:
+        verbose_name = 'Ingredient in the recipe'
+        verbose_name_plural = 'Ingredients in the recipes'
+
+    def __str__(self):
+        return f'{self.ingredient} в {self.recipe}'
