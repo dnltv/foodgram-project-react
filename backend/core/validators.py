@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
 
-
 if TYPE_CHECKING:
     from recipes.models import Ingredient, Tag
 

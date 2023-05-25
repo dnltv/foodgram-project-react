@@ -1,8 +1,5 @@
 import unicodedata
 
-from core import texts
-from core.enums import Limits
-from core.validators import MinLenValidator, OneOfTwoValidator
 from django.contrib.auth.models import AbstractUser
 from django.db.models import (CASCADE, BooleanField, CharField,
                               CheckConstraint, DateTimeField, EmailField, F,
@@ -10,6 +7,10 @@ from django.db.models import (CASCADE, BooleanField, CharField,
 from django.db.models.functions import Length
 from django.utils.translation import gettext_lazy as _
 
+from core.enums import Limits
+from core.texts import (USERS_HELP_EMAIL, USERS_HELP_FIRSTNAME,
+                        USERS_HELP_USERNAME)
+from core.validators import MinLenValidator, OneOfTwoValidator
 
 CharField.register_lookup(Length)
 
@@ -47,13 +48,13 @@ class User(AbstractUser):
         verbose_name='Адрес электронной почты',
         max_length=Limits.MAX_LEN_EMAIL_FIELD.value,
         unique=True,
-        help_text=texts.USERS_HELP_EMAIL,
+        help_text=USERS_HELP_EMAIL,
     )
     username = CharField(
         verbose_name='Уникальный юзернейм',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
         unique=True,
-        help_text=texts.USERS_HELP_USERNAME,
+        help_text=USERS_HELP_USERNAME,
         validators=(
             MinLenValidator(
                 min_len=Limits.MIN_LEN_USERNAME,
@@ -65,7 +66,7 @@ class User(AbstractUser):
     first_name = CharField(
         verbose_name='Имя',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
-        help_text=texts.USERS_HELP_FIRSTNAME,
+        help_text=USERS_HELP_FIRSTNAME,
         validators=(OneOfTwoValidator(
             first_regex='[^а-яёА-ЯЁ -]+',
             second_regex='[^a-zA-Z -]+',
@@ -75,7 +76,7 @@ class User(AbstractUser):
     last_name = CharField(
         verbose_name='Фамилия',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
-        help_text=texts.USERS_HELP_FIRSTNAME,
+        help_text=USERS_HELP_FIRSTNAME,
         validators=(OneOfTwoValidator(
             first_regex='[^а-яёА-ЯЁ -]+',
             second_regex='[^a-zA-Z -]+',
@@ -85,7 +86,7 @@ class User(AbstractUser):
     password = CharField(
         verbose_name=_('Пароль'),
         max_length=128,
-        help_text=texts.USERS_HELP_FIRSTNAME,
+        help_text=USERS_HELP_FIRSTNAME,
     )
     is_active = BooleanField(
         verbose_name='Активирован',
