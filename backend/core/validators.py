@@ -130,7 +130,7 @@ def hex_color_validator(color: str) -> str:
     return '#' + color.upper()
 
 
-def tags_exist_validator(tags_ids: list[int | str], Tag: 'Tag') -> None:
+def tags_exist_validator(tags_ids: list[int | str], tag: 'Tag') -> None:
     """Проверяет наличие тэгов с указанными id.
 
     Args:
@@ -140,7 +140,7 @@ def tags_exist_validator(tags_ids: list[int | str], Tag: 'Tag') -> None:
     Raises:
         ValidationError: Тэга с одним из указанных id не существует.
     """
-    exists_tags = Tag.objects.filter(id__in=tags_ids)
+    exists_tags = tag.objects.filter(id__in=tags_ids)
 
     if len(exists_tags) != len(tags_ids):
         raise ValidationError('Указан несуществующий тэг')
@@ -148,7 +148,7 @@ def tags_exist_validator(tags_ids: list[int | str], Tag: 'Tag') -> None:
 
 def ingredients_validator(
     ingredients: list[dict[str, str | int]],
-    Ingredient: 'Ingredient',
+    ingredient: 'Ingredient',
 ) -> dict[int, tuple['Ingredient', int]]:
     """Проверяет список ингридиентов.
 
@@ -180,7 +180,7 @@ def ingredients_validator(
     if not valid_ings:
         raise ValidationError('Неправильные ингидиенты')
 
-    db_ings = Ingredient.objects.filter(pk__in=valid_ings.keys())
+    db_ings = ingredient.objects.filter(pk__in=valid_ings.keys())
     if not db_ings:
         raise ValidationError('Неправильные ингидиенты')
 

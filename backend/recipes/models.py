@@ -1,3 +1,5 @@
+from core.enums import Limits, Tuples
+from core.validators import OneOfTwoValidator, hex_color_validator
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
@@ -7,9 +9,6 @@ from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
                               UniqueConstraint)
 from django.db.models.functions import Length
 from PIL import Image
-
-from core.enums import Limits, Tuples
-from core.validators import OneOfTwoValidator, hex_color_validator
 
 CharField.register_lookup(Length)
 
