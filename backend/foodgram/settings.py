@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv(
@@ -12,6 +13,8 @@ SECRET_KEY = os.getenv(
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
 
 
 INSTALLED_APPS = [
