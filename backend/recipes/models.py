@@ -1,5 +1,5 @@
-# from core.enums import Limits, Tuples
-# from core.validators import OneOfTwoValidator, hex_color_validator
+from core.enums import Limits, Tuples
+from core.validators import OneOfTwoValidator, hex_color_validator
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
@@ -8,7 +8,7 @@ from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
                               PositiveSmallIntegerField, Q, TextField,
                               UniqueConstraint)
 from django.db.models.functions import Length
-# from PIL import Image
+from PIL import Image
 
 
 CharField.register_lookup(Length)
@@ -20,8 +20,8 @@ class Tag(Model):
     """A model representing tags for recipes."""
     name = CharField(
         verbose_name='Tag',
-        #max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
-        #validators=(OneOfTwoValidator(field='tag name'),),
+        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+        validators=(OneOfTwoValidator(field='tag name'),),
         unique=True,
     )
     color = CharField(
@@ -32,7 +32,7 @@ class Tag(Model):
     )
     slug = CharField(
         verbose_name='tag slug',
-        #max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
         unique=True,
         db_index=False,
     )
@@ -48,7 +48,7 @@ class Tag(Model):
     def clean(self) -> None:
         self.name = self.name.strip().lower()
         self.slug = self.slug.strip().lower()
-        #self.color = hex_color_validator(self.color)
+        self.color = hex_color_validator(self.color)
         return super().clean()
 
 
@@ -67,7 +67,7 @@ class Ingredient(Model):
     """
     name = CharField(
         verbose_name='Ингридиент',
-        #max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
     )
     measurement_unit = CharField(
         verbose_name='Единицы измерения',
@@ -135,7 +135,7 @@ class Recipe(Model):
     """
     name = CharField(
         verbose_name='Название блюда',
-        #max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
     )
     author = ForeignKey(
         verbose_name='Автор рецепта',
@@ -166,18 +166,18 @@ class Recipe(Model):
     )
     text = TextField(
         verbose_name='Описание блюда',
-        #max_length=Limits.MAX_LEN_RECIPES_TEXTFIELD.value,
+        max_length=Limits.MAX_LEN_RECIPES_TEXTFIELD.value,
     )
     cooking_time = PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         default=0,
         validators=(
             MinValueValidator(
-                #Limits.MIN_COOKING_TIME.value,
+                Limits.MIN_COOKING_TIME.value,
                 'Ваше блюдо уже готово!',
             ),
             MaxValueValidator(
-                #Limits.MAX_COOKING_TIME.value,
+                Limits.MAX_COOKING_TIME.value,
                 'Очень долго ждать...',
             ),
         ),
@@ -202,11 +202,11 @@ class Recipe(Model):
         self.name = self.name.capitalize()
         return super().clean()
 
-    # def save(self, *args, **kwargs) -> None:
-    #     super().save(*args, **kwargs)
-    #     image = Image.open(self.image.path)
-    #     image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
-    #     image.save(self.image.path)
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        image = Image.open(self.image.path)
+        image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
+        image.save(self.image.path)
 
     def __str__(self) -> str:
         return f'{self.name}. Автор: {self.author.username}'
@@ -243,11 +243,11 @@ class AmountIngredient(Model):
         default=0,
         validators=(
             MinValueValidator(
-                #Limits.MIN_AMOUNT_INGREDIENTS,
+                Limits.MIN_AMOUNT_INGREDIENTS,
                 'Нужно хоть какое-то количество.',
             ),
             MaxValueValidator(
-                #Limits.MAX_AMOUNT_INGREDIENTS,
+                Limits.MAX_AMOUNT_INGREDIENTS,
                 'Слишком много!',
             ),
         ),
