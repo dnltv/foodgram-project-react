@@ -28,9 +28,9 @@ from users.models import Subscriptions
 User = get_user_model()
 
 
-class BaseAPIRootView(APIRootView):
-    """Базовые пути API приложения.
-    """
+# class BaseAPIRootView(APIRootView):
+#     """Базовые пути API приложения.
+#     """
 
 
 class UserViewSet(DjoserUserViewSet, AddDelViewMixin):
