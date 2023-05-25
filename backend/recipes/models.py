@@ -1,239 +1,3 @@
-from typing import Optional
-
-from django.contrib.auth import get_user_model
-from django.db import models
-from django.db.models import Exists, OuterRef
-
-
-from core.enums import Limits, Tuples
-from core.validators import OneOfTwoValidator, hex_color_validator
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
-                              DateTimeField, ForeignKey, ImageField,
-                              ManyToManyField, Model,
-                              PositiveSmallIntegerField, Q, TextField,
-                              UniqueConstraint)
-from django.db.models.functions import Length
-from PIL import Image
-
-
-CharField.register_lookup(Length)
-
-User = get_user_model()
-
-
-class Ingredient(models.Model):
-    """A model representing an Ingredient for a Recipe."""
-    name = models.CharField(max_length=200, verbose_name='Name')
-    measurement_unit = models.CharField(
-        max_length=200,
-        verbose_name='Unit of measurement'
-    )
-
-    class Meta:
-        verbose_name = 'Ingredient'
-        verbose_name_plural = 'Ingredients'
-        ordering = ('name',)
-        constraints = (
-            UniqueConstraint(
-                fields=('name', 'measurement_unit'),
-                name='unique_for_ingredient'
-            ),
-            CheckConstraint(
-                check=Q(name__length__gt=0),
-                name='\n%(app_label)s_%(class)s_name is empty\n',
-            ),
-            CheckConstraint(
-                check=Q(measurement_unit__length__gt=0),
-                name='\n%(app_label)s_%(class)s_measurement_unit is empty\n',
-            ),
-        )
-
-    def clean(self) -> None:
-        self.name = self.name.lower()
-        self.measurement_unit = self.measurement_unit.lower()
-        super().clean()
-
-    def __str__(self):
-        return f'{self.name} ({self.measurement_unit})'
-
-
-class RecipeQuerySet(models.QuerySet):
-
-    def add_user_annotations(self, user_id: Optional[int]):
-        return self.annotate(
-            is_favorite=Exists(
-                Favorite.objects.filter(
-                    user_id=user_id, recipe__pk=OuterRef('pk')
-                )
-            )
-        )
-
-
-class Recipe(models.Model):
-    """A model representing a recipe."""
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='recipes',
-        verbose_name='Author'
-    )
-    name = models.CharField(max_length=200, verbose_name='Name of the recipe')
-    tags = ManyToManyField(
-        verbose_name='Тег',
-        related_name='recipes',
-        to='Tag',
-    )
-    text = models.TextField(verbose_name='Text')
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        through='RecipeIngredient',
-        through_fields=('recipe', 'ingredient'),
-        verbose_name='Ingredients'
-    )
-    slug = models.SlugField(verbose_name='slug')
-    pub_date = models.DateTimeField(
-        verbose_name='Date of publication',
-        auto_now=True,
-        db_index=True
-    )
-    image = ImageField(
-        verbose_name='Изображение блюда',
-        upload_to='recipe_images/',
-    )
-    cooking_time = PositiveSmallIntegerField(
-        verbose_name='Время приготовления',
-        default=0,
-        validators=(
-            MinValueValidator(
-                Limits.MIN_COOKING_TIME.value,
-                'Ваше блюдо уже готово!',
-            ),
-            MaxValueValidator(
-                Limits.MAX_COOKING_TIME.value,
-                'Очень долго ждать...',
-            ),
-        ),
-    )
-    objects = RecipeQuerySet.as_manager()
-
-    class Meta:
-        ordering = ('-pub_date', )
-        verbose_name = 'Recipe'
-        verbose_name_plural = 'Recipes'
-        constraints = (
-            UniqueConstraint(
-                fields=('name', 'author'),
-                name='unique_for_author',
-            ),
-            CheckConstraint(
-                check=Q(name__length__gt=0),
-                name='\n%(app_label)s_%(class)s_name is empty\n',
-            ),
-        )
-
-    def clean(self) -> None:
-        self.name = self.name.capitalize()
-        return super().clean()
-
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-        image = Image.open(self.image.path)
-        image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
-        image.save(self.image.path)
-
-    def __str__(self):
-        return self.name
-
-
-class RecipeIngredient(models.Model):
-    """A model representing ingridients for recipe."""
-    amount = models.PositiveIntegerField(verbose_name='Amount')
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        verbose_name='Ingredient'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Recipe'
-    )
-
-    class Meta:
-        ordering = ('recipe',)
-        verbose_name = 'Ingredient in the recipe'
-        verbose_name_plural = 'Ingredients in the recipes'
-        constraints = (
-            UniqueConstraint(
-                fields=('recipe', 'ingredients',),
-                name='\n%(app_label)s_%(class)s ingredient alredy added\n',
-            ),
-        )
-
-    def __str__(self):
-        return f'{self.ingredient} в {self.recipe}'
-
-
-class Favorite(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Пользователь'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Recipe'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_favorite_user_recipe'
-            )
-        ]
-        verbose_name = 'Favorites Object'
-        verbose_name_plural = 'Favorite Objects'
-
-
-class Cart(Model):
-    """Recipes in shoping cart"""
-    recipe = ForeignKey(
-        verbose_name='Recipes in the shopping carts',
-        related_name='in_carts',
-        to=Recipe,
-        on_delete=CASCADE,
-    )
-    user = ForeignKey(
-        verbose_name='List owner',
-        related_name='carts',
-        to=User,
-        on_delete=CASCADE,
-    )
-    date_added = DateTimeField(
-        verbose_name='Date added',
-        auto_now_add=True,
-        editable=False
-    )
-
-    class Meta:
-        verbose_name = 'Recipe in the shopping cart'
-        verbose_name_plural = 'Recipes in the shopping cart'
-        constraints = (
-            UniqueConstraint(
-                fields=('recipe', 'user', ),
-                name='\n%(app_label)s_%(class)s recipe is cart alredy\n',
-            ),
-        )
-
-    def __str__(self) -> str:
-        return f'{self.user} -> {self.recipe}'
-
-
 from core.enums import Limits, Tuples
 from core.validators import OneOfTwoValidator, hex_color_validator
 from django.contrib.auth import get_user_model
@@ -245,6 +9,7 @@ from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
                               UniqueConstraint)
 from django.db.models.functions import Length
 from PIL import Image
+
 
 CharField.register_lookup(Length)
 
@@ -328,13 +93,13 @@ class Ingredient(Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return f'{self.name} {self.measurement_unit}'
-
     def clean(self) -> None:
         self.name = self.name.lower()
         self.measurement_unit = self.measurement_unit.lower()
         super().clean()
+
+    def __str__(self) -> str:
+        return f'{self.name} {self.measurement_unit}'
 
 
 class Recipe(Model):
@@ -433,9 +198,6 @@ class Recipe(Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return f'{self.name}. Автор: {self.author.username}'
-
     def clean(self) -> None:
         self.name = self.name.capitalize()
         return super().clean()
@@ -445,6 +207,9 @@ class Recipe(Model):
         image = Image.open(self.image.path)
         image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
         image.save(self.image.path)
+
+    def __str__(self) -> str:
+        return f'{self.name}. Автор: {self.author.username}'
 
 
 class AmountIngredient(Model):
