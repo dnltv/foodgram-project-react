@@ -7,7 +7,7 @@ from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from core.services import recipe_ingredients_set
+from core.funcs import recipe_ingredients_set
 from core.validators import ingredients_validator, tags_exist_validator
 from recipes.models import Ingredient, Recipe, Tag
 

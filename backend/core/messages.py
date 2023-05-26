@@ -1,4 +1,4 @@
-from core.enums import Limits
+from core.limitations import Limits
 
 
 USERS_HELP_USERNAME = (
