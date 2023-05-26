@@ -1,13 +1,11 @@
-FROM python:3.10.2
-
-# Надо исправить: Сразу делаем WORKDIR, он создаст папку если ее нет и дальше можно не прописывать полный путь
-WORKDIR /code
-
-# Можно лучше: Копируем все сразу
-COPY ./requirements.txt ./requirements.txt
-
-# Надо исправить: Нигде не прописываем полный путь, тк мы уже сделали WORKDIR
-RUN pip install -r requirements.txt
-
-# Надо исправить: Оставляем CMD тут как требуют тесты, а из docker-compose убираем
-CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
+FROM python:3.11-slim
+RUN apt-get update &&\
+    apt-get upgrade -y &&\
+    apt-get install -y libpq-dev gcc netcat
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install -U pip &&\
+    pip install -r requirements.txt --no-cache-dir
+COPY . .
+RUN chmod +x run_app.sh
+ENTRYPOINT ["/app/run_app.sh"]
