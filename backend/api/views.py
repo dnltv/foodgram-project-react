@@ -1,6 +1,18 @@
 from datetime import datetime as dt
 from urllib.parse import unquote
 
+from django.contrib.auth import get_user_model
+from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import F, Q, QuerySet, Sum
+from django.http.response import HttpResponse
+from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+from foodgram.settings import DATE_TIME_FORMAT
+from recipes.models import Carts, Favorites, Ingredient, Recipe, Tag
 from api.mixins import AddDelViewMixin
 from api.paginators import PageLimitPagination
 from api.permissions import (AdminOrReadOnly, AuthorStaffOrReadOnly,
@@ -10,18 +22,8 @@ from api.serializers import (IngredientSerializer, RecipeSerializer,
                              UserSubscribeSerializer)
 from core.enums import Tuples, UrlQueries
 from core.services import incorrect_layout
-from django.contrib.auth import get_user_model
-from django.core.handlers.wsgi import WSGIRequest
-from django.db.models import F, Q, QuerySet, Sum
-from django.http.response import HttpResponse
-from djoser.views import UserViewSet as DjoserUserViewSet
-from foodgram.settings import DATE_TIME_FORMAT
-from recipes.models import Carts, Favorites, Ingredient, Recipe, Tag
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.models import Subscriptions
+
 
 User = get_user_model()
 
