@@ -5,27 +5,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
 
-from core.enums import Tuples
+from core.limitations import Tuples
+
 
 class AddDelViewMixin:
-    """
-    Добавляет во Viewset дополнительные методы.
-
-    Содержит метод добавляющий/удаляющий объект связи
-    Many-to-Many между моделями.
-    Требует определения атрибута `add_serializer`.
-
-    Example:
-        class ExampleViewSet(ModelViewSet, AddDelViewMixin)
-            ...
-            add_serializer = ExamplSerializer
-
-            def example_func(self, request, **kwargs):
-                ...
-                obj_id = ...
-                return self.add_del_obj(obj_id, relation.M2M)
-    """
-
     add_serializer: ModelSerializer | None = None
 
     def _add_del_obj(
@@ -34,19 +17,6 @@ class AddDelViewMixin:
         m2m_model: Model,
         q: Q
     ) -> Response:
-        """Добавляет/удаляет связь M2M между пользователем и другим объектом.
-
-        Args:
-            obj_id (int | str):
-                `id` объекта, с которым требуется создать/удалить связь.
-            m2m_model (Model):
-                М2M модель управляющая требуемой связью.
-            q (Q):
-                Условие фильтрации объектов.
-
-        Returns:
-            Responce: Статус подтверждающий/отклоняющий действие.
-        """
         obj = get_object_or_404(self.queryset, id=obj_id)
         serializer: ModelSerializer = self.add_serializer(obj)
         m2m_obj = m2m_model.objects.filter(q & Q(user=self.request.user))

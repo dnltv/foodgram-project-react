@@ -12,46 +12,19 @@ from core.messages import (USERS_HELP_EMAIL, USERS_HELP_FIRSTNAME,
                         USERS_HELP_USERNAME)
 from core.validators import MinLenValidator, OneOfTwoValidator
 
+
 CharField.register_lookup(Length)
 
 
 class User(AbstractUser):
-    """Настроенная под приложение `Foodgram` модель пользователя.
-
-    При создании пользователя все поля обязательны для заполнения.
-
-    Attributes:
-        email(str):
-            Адрес email пользователя.
-            Проверка формата производится внутри Django.
-            Установлено ограничение по максимальной длине.
-        username(str):
-            Юзернейм пользователя.
-            Установлены ограничения по минимальной и максимальной длине.
-            Для ввода разрешены только буквы.
-        first_name(str):
-            Реальное имя пользователя.
-            Установлено ограничение по максимальной длине.
-        last_name(str):
-            Реальная фамилия пользователя.
-            Установлено ограничение по максимальной длине.
-        password(str):
-            Пароль для авторизации.
-            Внутри Django проходит хэш-функцию с добавлением
-            `соли` settings.SECRET_KEY.
-            Хранится в зашифрованном виде.
-            Установлено ограничение по максимальной длине.
-        is_active (bool):
-            Активен или заблокирован пользователь.
-    """
     email = EmailField(
-        verbose_name='Адрес электронной почты',
+        verbose_name='Email address',
         max_length=Limits.MAX_LEN_EMAIL_FIELD.value,
         unique=True,
         help_text=USERS_HELP_EMAIL,
     )
     username = CharField(
-        verbose_name='Уникальный юзернейм',
+        verbose_name='username',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
         unique=True,
         help_text=USERS_HELP_USERNAME,
@@ -64,38 +37,38 @@ class User(AbstractUser):
         ),
     )
     first_name = CharField(
-        verbose_name='Имя',
+        verbose_name='First name',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
         help_text=USERS_HELP_FIRSTNAME,
         validators=(OneOfTwoValidator(
             first_regex='[^а-яёА-ЯЁ -]+',
             second_regex='[^a-zA-Z -]+',
-            field='Имя'),
+            field='First name'),
         ),
     )
     last_name = CharField(
-        verbose_name='Фамилия',
+        verbose_name='Last name',
         max_length=Limits.MAX_LEN_USERS_CHARFIELD.value,
         help_text=USERS_HELP_FIRSTNAME,
         validators=(OneOfTwoValidator(
             first_regex='[^а-яёА-ЯЁ -]+',
             second_regex='[^a-zA-Z -]+',
-            field='Фамилия'),
+            field='Last name'),
         ),
     )
     password = CharField(
-        verbose_name=_('Пароль'),
+        verbose_name=_('Password'),
         max_length=128,
         help_text=USERS_HELP_FIRSTNAME,
     )
     is_active = BooleanField(
-        verbose_name='Активирован',
+        verbose_name='Active',
         default=True,
     )
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
         ordering = ('username',)
         constraints = (
             CheckConstraint(
@@ -109,8 +82,6 @@ class User(AbstractUser):
 
     @classmethod
     def normalize_email(cls, email: str) -> str:
-        """ Normalize the email address by lowercasing the domain part of it.
-        """
         email = email or ""
         try:
             email_name, domain_part = email.strip().rsplit("@", 1)
@@ -124,16 +95,7 @@ class User(AbstractUser):
     def normalize_username(cls, username: str) -> str:
         return unicodedata.normalize("NFKC", username).capitalize()
 
-    def __normalize_human_names(self, name: str) -> str:
-        """Нормализует имена и фамилии. Например:
-        - Эрих Мария Ремарк
-        - Крестово-Воздвиженский
-
-        Args:
-            name (str): Проверяемое имя.
-        Returns:
-            str: Нормализованное имя.
-        """
+    def normalize_human_names(self, name: str) -> str:
         storage = [None] * len(name)
         title = True
         idx = 0
@@ -158,45 +120,35 @@ class User(AbstractUser):
 
 
 class Subscriptions(Model):
-    """Подписки пользователей друг на друга.
-
-    Attributes:
-        author(int):
-            Автор рецепта. Связь через ForeignKey.
-        user(int):
-            Подписчик Связь через ForeignKey.
-        date_added(datetime):
-            Дата создания подписки.
-    """
     author = ForeignKey(
-        verbose_name='Автор рецепта',
+        verbose_name='Author of the recipe',
         related_name='subscribers',
         to=User,
         on_delete=CASCADE,
     )
     user = ForeignKey(
-        verbose_name='Подписчики',
+        verbose_name='Subscribers',
         related_name='subscriptions',
         to=User,
         on_delete=CASCADE,
     )
     date_added = DateTimeField(
-        verbose_name='Дата создания подписки',
+        verbose_name='Date of subscribe',
         auto_now_add=True,
         editable=False
     )
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = 'Subscribe'
+        verbose_name_plural = 'Subscribes'
         constraints = (
             UniqueConstraint(
                 fields=('author', 'user'),
-                name='\nRepeat subscription\n',
+                name='\nRe-subscription\n',
             ),
             CheckConstraint(
                 check=~Q(author=F('user')),
-                name='\nNo self sibscription\n'
+                name='\nIt is impossible to subscribe to yourself\n'
             )
         )
 
