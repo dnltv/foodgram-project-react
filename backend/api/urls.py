@@ -7,9 +7,9 @@ from api.views import IngredientViewSet, RecipeViewSet, TagViewSet, UserViewSet
 app_name = 'api'
 
 router_v1 = DefaultRouter()
-router_v1.register('tags', TagViewSet, 'tags')
-router_v1.register('ingredients', IngredientViewSet, 'ingredients')
 router_v1.register('recipes', RecipeViewSet, 'recipes')
+router_v1.register('ingredients', IngredientViewSet, 'ingredients')
+router_v1.register('tags', TagViewSet, 'tags')
 router_v1.register('users', UserViewSet, 'users')
 
 urlpatterns = (

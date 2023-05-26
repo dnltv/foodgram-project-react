@@ -1,14 +1,11 @@
-from django.contrib.admin import (ModelAdmin, TabularInline, display, register,
-                                  site)
+from django.contrib.admin import ModelAdmin, TabularInline, display, register
 from django.core.handlers.wsgi import WSGIRequest
 from django.utils.html import format_html
 from django.utils.safestring import SafeString, mark_safe
+
 from recipes.forms import TagForm
 from recipes.models import (AmountIngredient, Carts, Favorites, Ingredient,
                             Recipe, Tag)
-
-site.site_header = 'Администрирование Foodgram'
-EMPTY_VALUE_DISPLAY = 'Значение не указано'
 
 
 class IngredientInline(TabularInline):
@@ -34,7 +31,7 @@ class IngredientAdmin(ModelAdmin):
     )
 
     save_on_top = True
-    empty_value_display = EMPTY_VALUE_DISPLAY
+    empty_value_display = '-empty-'
 
 
 @register(Recipe)
@@ -58,17 +55,17 @@ class RecipeAdmin(ModelAdmin):
 
     inlines = (IngredientInline,)
     save_on_top = True
-    empty_value_display = EMPTY_VALUE_DISPLAY
+    empty_value_display = '-empty-'
 
     def get_image(self, obj: Recipe) -> SafeString:
         return mark_safe(f'<img src={obj.image.url} width="80" hieght="30"')
 
-    get_image.short_description = 'Изображение'
+    get_image.short_description = 'Image'
 
     def count_favorites(self, obj: Recipe) -> int:
         return obj.in_favorites.count()
 
-    count_favorites.short_description = 'В избранном'
+    count_favorites.short_description = 'Favorites'
 
 
 @register(Tag)
@@ -82,7 +79,7 @@ class TagAdmin(ModelAdmin):
     )
 
     save_on_top = True
-    empty_value_display = EMPTY_VALUE_DISPLAY
+    empty_value_display = '-empty-'
 
     @display(description='Colored')
     def color_code(self, obj: Tag):
@@ -91,7 +88,7 @@ class TagAdmin(ModelAdmin):
             obj.color[1:], obj.color
         )
 
-    color_code.short_description = 'Цветовой код тэга'
+    color_code.short_description = 'Color code of tag'
 
 
 @register(Favorites)
