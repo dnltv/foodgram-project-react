@@ -120,48 +120,33 @@ class Recipe(models.Model):
         return self.name
 
 
-class AmountIngredient(Model):
-    """A model representing amount of ingredients in recipe."""
-    recipe = ForeignKey(
-        verbose_name='In which recipes',
-        related_name='ingredient',
-        to=Recipe,
-        on_delete=CASCADE,
-    )
-    ingredients = ForeignKey(
-        verbose_name='Related Ingredients',
-        related_name='recipe',
-        to=Ingredient,
-        on_delete=CASCADE,
-    )
-    amount = PositiveSmallIntegerField(
+class RecipeIngredient(models.Model):
+    """A model representing ingredients for a specific recipe."""
+    amount = models.PositiveIntegerField(
         verbose_name='Amount',
-        default=0,
-        validators=(
-            MinValueValidator(
-                Limits.MIN_AMOUNT_INGREDIENTS,
-                'Specify a larger amount of ingredients',
-            ),
-            MaxValueValidator(
-                Limits.MAX_AMOUNT_INGREDIENTS,
-                'Specify fewer ingredients',
-            ),
-        ),
+        validators=(MinValueValidator(1), ),
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Ингредиент',
+        related_name='ingredient_amount',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Recipe',
+        related_name='ingredient_amount',
     )
 
     class Meta:
-        verbose_name = 'Ingredient'
-        verbose_name_plural = 'Amount of ingredients'
-        ordering = ('recipe', )
-        constraints = (
-            UniqueConstraint(
-                fields=('recipe', 'ingredients', ),
-                name='\n%(app_label)s_%(class)s ingredient alredy added\n',
-            ),
-        )
+        ordering = ('recipe__name',)
+        verbose_name = 'Ingredient in recipe'
+        verbose_name_plural = 'Ingredients in recipes'
+        unique_together = ('ingredient', 'recipe')
 
-    def __str__(self) -> str:
-        return f'{self.amount} {self.ingredients}'
+    def __str__(self):
+        return f'{self.recipe}: {self.ingredient} in amount: {self.amount}'
 
 
 class Carts(Model):
