@@ -1,8 +1,7 @@
-import base64
-
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from rest_framework import serializers
+from django.db import transaction
+from rest_framework import serializers, status
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
@@ -47,16 +46,6 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeIngredient
         fields = ('recipe', 'id', 'amount')
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -117,3 +106,86 @@ class RecipeSerializer(serializers.ModelSerializer):
         return ShoppingCart.objects.filter(
             user=request.user, recipe_id=obj
         ).exists()
+
+
+class RecipeCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор обновления и добавления новых рецептов
+    """
+    ingredients = RecipeIngredientCreateSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all(),
+    )
+    image = Base64ImageField()
+    author = UserSerializer(required=False)
+
+    def validate_ingredients(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
+            raise serializers.ValidationError(
+                {'ingredients': 'Вы забыли про ингредиенты'},
+                status.HTTP_400_BAD_REQUEST,
+            )
+        valid_list = []
+        for ingredient in ingredients:
+            if ingredient in valid_list:
+                raise serializers.ValidationError(
+                    {'ingredients': 'Ингредиенты должны быть уникальными'},
+                    status.HTTP_400_BAD_REQUEST,
+                )
+            valid_list.append(ingredient)
+            if int(ingredient['amount']) < 1:
+                raise serializers.ValidationError(
+                    {'ingredients':
+                         'Количество ингердиента должно быть 1 или больше'},
+                    status.HTTP_400_BAD_REQUEST,
+                )
+        return data
+
+    @staticmethod
+    def _create_data(ingredients, obj):
+        create_ingredients = [
+            RecipeIngredient(
+                recipe=obj,
+                ingredient=ingredient['ingredient'],
+                amount=ingredient['amount'],
+            )
+            for ingredient in ingredients
+        ]
+
+        RecipeIngredient.objects.bulk_create(
+            create_ingredients
+        )
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self._create_data(ingredients, recipe)
+
+        return recipe
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('ingredients', None)
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.set(tags)
+        if ingredients is not None:
+            instance.ingredients.clear()
+        self._create_data(ingredients, instance)
+
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(
+            instance,
+            context={'request': self.context.get('request')},
+        ).data
+
+    class Meta:
+        model = Recipe
+        exclude = ('pub_date',)
