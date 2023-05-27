@@ -16,12 +16,12 @@ User = get_user_model()
 class Ingredient(models.Model):
     """A model representing an ingredient."""
     name = models.CharField(
-        'Name of ingredient',
+        verbose_name='Name of ingredient',
         max_length=200,
         help_text='Enter the name of the ingredient',
     )
     measurement_unit = models.CharField(
-        'Measurement unit',
+        verbose_name='Measurement unit',
         max_length=200,
         help_text='Enter measurement unit',
     )
@@ -37,13 +37,13 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     """A model representing tags for recipes."""
     name = models.CharField(
-        'Name of tag',
+        verbose_name='Name of tag',
         max_length=200,
         help_text='Enter the tag name',
         unique=True,
     )
     color = models.CharField(
-        'Color of the tag',
+        verbose_name='Color of the tag',
         max_length=7,
         help_text='Enter color HEX-code of the tag',
         unique=True,
@@ -63,85 +63,61 @@ class Tag(models.Model):
         return self.name
 
 
-class Recipe(Model):
+class Recipe(models.Model):
     """A model representing recipes."""
-    name = CharField(
-        verbose_name='Name of the recipe',
-        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
-    )
-    author = ForeignKey(
-        verbose_name='Author of the recipe',
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
         related_name='recipes',
-        to=User,
-        on_delete=SET_NULL,
-        null=True,
+        verbose_name='Author of the recipe',
     )
-    tags = ManyToManyField(
+    name = models.CharField(
+        verbose_name='Name of the recipe',
+        max_length=200,
+    )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        verbose_name='Ingredients of the recipe',
+        related_name='ingredients',
+        through='RecipeIngredient',
+        through_fields=('recipe', 'ingredient'),
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name='Cooking time in minutes',
+        validators=(MinValueValidator(1),),
+        help_text='Enter the cooking time in minutes'
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Date and time of recipe creation',
+        auto_now_add=True,
+        db_index=True,
+    )
+    text = models.TextField(
+        verbose_name='Recipe description',
+        blank=False,
+        null=False,
+        help_text='Enter the description of the recipe',
+    )
+    tags = models.ManyToManyField(
+        Tag,
         verbose_name='Tag',
         related_name='recipes',
-        to='Tag',
     )
-    ingredients = ManyToManyField(
-        verbose_name='Ingredients of the recipe',
-        related_name='recipes',
-        to=Ingredient,
-        through='recipes.AmountIngredient',
-    )
-    pub_date = DateTimeField(
-        verbose_name='',
-        auto_now_add=True,
-        editable=False,
-    )
-    image = ImageField(
-        verbose_name='Image of the dish',
-        upload_to='recipe_images/',
-    )
-    text = TextField(
-        verbose_name='Description of the dish',
-        max_length=Limits.MAX_LEN_RECIPES_TEXTFIELD.value,
-    )
-    cooking_time = PositiveSmallIntegerField(
-        verbose_name='Cooking time',
-        default=0,
-        validators=(
-            MinValueValidator(
-                Limits.MIN_COOKING_TIME.value,
-                'Cooking time is too short',
-            ),
-            MaxValueValidator(
-                Limits.MAX_COOKING_TIME.value,
-                'Cooking time is too long',
-            ),
-        ),
+    image = models.ImageField(
+        verbose_name='Image of the recipe',
+        upload_to='recipes/images',
+        help_text='Attach a photo of the recipe',
+        null=True,
+        default=None,
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
-        ordering = ('-pub_date', )
-        constraints = (
-            UniqueConstraint(
-                fields=('name', 'author'),
-                name='unique_for_author',
-            ),
-            CheckConstraint(
-                check=Q(name__length__gt=0),
-                name='\n%(app_label)s_%(class)s_name is empty\n',
-            ),
-        )
-
-    def clean(self) -> None:
-        self.name = self.name.capitalize()
-        return super().clean()
-
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-        image = Image.open(self.image.path)
-        image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
-        image.save(self.image.path)
 
     def __str__(self) -> str:
-        return f'{self.name}. Author: {self.author.username}'
+        return self.name
 
 
 class AmountIngredient(Model):
