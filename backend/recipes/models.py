@@ -168,38 +168,40 @@ class RecipeIngredient(models.Model):
         return f'{self.recipe}: {self.ingredient} in amount: {self.amount}'
 
 
-class Carts(Model):
+class ShoppingCart(models.Model):
     """A model representing recipes in shopping cart."""
-    recipe = ForeignKey(
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
         verbose_name='Recipe in the shopping cart',
-        related_name='in_carts',
-        to=Recipe,
-        on_delete=CASCADE,
+        related_name='shopping_cart',
+        help_text='Select the recipe to add to shopping cart',
     )
-    user = ForeignKey(
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
         verbose_name='Cart owner',
-        related_name='carts',
-        to=User,
-        on_delete=CASCADE,
+        related_name='shopping_cart',
     )
-    date_added = DateTimeField(
+    pub_date = models.DateTimeField(
         verbose_name='Date added',
         auto_now_add=True,
-        editable=False
+        db_index=True,
     )
 
     class Meta:
-        verbose_name = 'Recipe in the shopping cart'
-        verbose_name_plural = 'Recipes in the shopping cart'
+        ordering = ('-pub_date',)
+        verbose_name = 'Shopping cart'
+        verbose_name_plural = 'Shopping carts'
         constraints = (
-            UniqueConstraint(
-                fields=('recipe', 'user', ),
-                name='\n%(app_label)s_%(class)s recipe is cart alredy\n',
+            models.UniqueConstraint(
+                fields=('recipe', 'owner', ),
+                name='unique_shopping_cart',
             ),
         )
 
     def __str__(self) -> str:
-        return f'{self.user} -> {self.recipe}'
+        return f'{self.owner} -> {self.recipe}'
 
 
 class Favorites(Model):
