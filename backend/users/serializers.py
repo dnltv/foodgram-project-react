@@ -1,10 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.password_validation import validate_password
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from .models import Follow, User
 from api.serializers import ShortRecipeSerializer
 
 
@@ -12,7 +10,6 @@ User = get_user_model()
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
-
     class Meta(UserCreateSerializer.Meta):
         fields = (
             'email',
