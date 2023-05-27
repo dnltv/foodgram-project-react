@@ -1,14 +1,11 @@
+from typing import Optional
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.functions import Length
-from PIL import Image
+from django.db.models import Exists, OuterRef
+from django.utils.text import slugify
 
-from core.limitations import Limits, Tuples
-from core.validators import OneOfTwoValidator, hex_color_validator
-
-
-CharField.register_lookup(Length)
 
 User = get_user_model()
 
@@ -63,6 +60,22 @@ class Tag(models.Model):
         return self.name
 
 
+class RecipeQuerySet(models.QuerySet):
+    def add_user_annotation(self, user_id: Optional[int]):
+        return self.annotate(
+            is_favorited=Exists(
+                Favorite.objects.filter(
+                    user_id=user_id, recipe__pk=OuterRef('pk')
+                )
+            ),
+            is_in_shopping_cart=Exists(
+                ShoppingCart.objects.filter(
+                    user_id=user_id, recipe__pk=OuterRef('pk')
+                )
+            ),
+        )
+
+
 class Recipe(models.Model):
     """A model representing recipes."""
     author = models.ForeignKey(
@@ -110,11 +123,17 @@ class Recipe(models.Model):
         null=True,
         default=None,
     )
+    objects = RecipeQuerySet.as_manager()
 
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop('from_admin', False):
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.name
@@ -129,7 +148,7 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингредиент',
+        verbose_name='Ingredient',
         related_name='ingredient_amount',
     )
     recipe = models.ForeignKey(
