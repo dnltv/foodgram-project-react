@@ -195,7 +195,7 @@ class ShoppingCart(models.Model):
         verbose_name_plural = 'Shopping carts'
         constraints = (
             models.UniqueConstraint(
-                fields=('recipe', 'owner', ),
+                fields=('recipe', 'owner'),
                 name='unique_shopping_cart',
             ),
         )
@@ -204,35 +204,37 @@ class ShoppingCart(models.Model):
         return f'{self.owner} -> {self.recipe}'
 
 
-class Favorites(Model):
-    """A model representing Favorite recipes."""
-    recipe = ForeignKey(
-        verbose_name='Favorite recipe',
-        related_name='in_favorites',
-        to=Recipe,
-        on_delete=CASCADE,
+class Favorite(models.Model):
+    """A model representing favorite recipes."""
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Recipe',
+        related_name='favorites',
+        on_delete=models.CASCADE,
+        help_text='Select the recipe to add to favorites'
     )
-    user = ForeignKey(
+    owner = models.ForeignKey(
+        User,
         verbose_name='User',
         related_name='favorites',
-        to=User,
-        on_delete=CASCADE,
+        on_delete=models.CASCADE,
     )
-    date_added = DateTimeField(
+    pub_date = models.DateTimeField(
         verbose_name='Date added',
         auto_now_add=True,
-        editable=False
+        db_index=True,
+        editable=False,
     )
 
     class Meta:
-        verbose_name = 'Favorite recipe'
-        verbose_name_plural = 'Favorites recipes'
+        verbose_name = 'Favorite'
+        verbose_name_plural = 'Favorites'
         constraints = (
-            UniqueConstraint(
-                fields=('recipe', 'user', ),
-                name='\n%(app_label)s_%(class)s recipe is favorite alredy\n',
+            models.UniqueConstraint(
+                fields=('recipe', 'owner'),
+                name='unique_favorite_recipe_owner'
             ),
         )
 
     def __str__(self) -> str:
-        return f'{self.user} -> {self.recipe}'
+        return f'{self.owner} -> {self.recipe}'
