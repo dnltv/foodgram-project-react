@@ -18,7 +18,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         'Name of ingredient',
         max_length=200,
-        help_text='Enter name of ingredient',
+        help_text='Enter the name of the ingredient',
     )
     measurement_unit = models.CharField(
         'Measurement unit',
@@ -34,25 +34,24 @@ class Ingredient(models.Model):
         return f'{self.name} {self.measurement_unit}'
 
 
-class Tag(Model):
+class Tag(models.Model):
     """A model representing tags for recipes."""
-    name = CharField(
-        verbose_name='Tag',
-        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
-        validators=(OneOfTwoValidator(field='tag name'),),
+    name = models.CharField(
+        'Name of tag',
+        max_length=200,
+        help_text='Enter the tag name',
         unique=True,
     )
-    color = CharField(
-        verbose_name='Color',
+    color = models.CharField(
+        'Color of the tag',
         max_length=7,
+        help_text='Enter color HEX-code of the tag',
         unique=True,
-        db_index=False,
     )
-    slug = CharField(
-        verbose_name='tag slug',
-        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+    slug = models.CharField(
+        'Tag slug',
+        max_length=200,
         unique=True,
-        db_index=False,
     )
 
     class Meta:
@@ -61,13 +60,7 @@ class Tag(Model):
         ordering = ('name',)
 
     def __str__(self) -> str:
-        return f'{self.name} (color: {self.color})'
-
-    def clean(self) -> None:
-        self.name = self.name.strip().lower()
-        self.slug = self.slug.strip().lower()
-        self.color = hex_color_validator(self.color)
-        return super().clean()
+        return self.name
 
 
 class Recipe(Model):
