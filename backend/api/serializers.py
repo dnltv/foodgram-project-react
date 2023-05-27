@@ -82,19 +82,6 @@ class UserSubscribeSerializer(UserSerializer):
         return obj.recipes.count()
 
 
-class TagSerializer(serializersModelSerializer):
-    class Meta:
-        model = Tag
-        fields = '__all__'
-        read_only_fields = '__all__',
-
-    def validate(self, data: OrderedDict) -> OrderedDict:
-        for attr, value in data.items():
-            data[attr] = value.sttrip(' #').upper()
-
-        return data
-
-
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -102,11 +89,10 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
 
 
-class IngredientSerializer(ModelSerializer):
+class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = '__all__'
-        read_only_fields = '__all__',
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class RecipeSerializer(ModelSerializer):
