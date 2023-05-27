@@ -1,10 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import (CASCADE, SET_NULL, CharField, CheckConstraint,
-                              DateTimeField, ForeignKey, ImageField,
-                              ManyToManyField, Model,
-                              PositiveSmallIntegerField, Q, TextField,
-                              UniqueConstraint)
+from django.db import models
 from django.db.models.functions import Length
 from PIL import Image
 
@@ -17,43 +13,24 @@ CharField.register_lookup(Length)
 User = get_user_model()
 
 
-class Ingredient(Model):
-    """A model representing ingredients for recipes.
-    """
-    name = CharField(
-        verbose_name='Ingredient',
-        max_length=Limits.MAX_LEN_RECIPES_CHARFIELD.value,
+class Ingredient(models.Model):
+    """A model representing an ingredient."""
+    name = models.CharField(
+        'Name of ingredient',
+        max_length=200,
+        help_text='Enter name of ingredient',
     )
-    measurement_unit = CharField(
-        verbose_name='Measurement unit',
-        max_length=24,
+    measurement_unit = models.CharField(
+        'Measurement unit',
+        max_length=200,
+        help_text='Enter measurement unit',
     )
 
     class Meta:
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
-        ordering = ('name', )
-        constraints = (
-            UniqueConstraint(
-                fields=('name', 'measurement_unit'),
-                name='unique_for_ingredient'
-            ),
-            CheckConstraint(
-                check=Q(name__length__gt=0),
-                name='\n%(app_label)s_%(class)s_name is empty\n',
-            ),
-            CheckConstraint(
-                check=Q(measurement_unit__length__gt=0),
-                name='\n%(app_label)s_%(class)s_measurement_unit is empty\n',
-            ),
-        )
 
-    def clean(self) -> None:
-        self.name = self.name.lower()
-        self.measurement_unit = self.measurement_unit.lower()
-        super().clean()
-
-    def __str__(self) -> str:
+    def __str__(self):
         return f'{self.name} {self.measurement_unit}'
 
 
