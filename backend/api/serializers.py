@@ -5,16 +5,15 @@ from django.core.exceptions import ValidationError
 from django.db.models import F, QuerySet
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework import serializers
 
-from core.funcs import recipe_ingredients_set
-from core.validators import ingredients_validator, tags_exist_validator
 from recipes.models import Ingredient, Recipe, Tag
+
 
 User = get_user_model()
 
 
-class ShortRecipeSerializer(ModelSerializer):
+class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time'
@@ -83,7 +82,7 @@ class UserSubscribeSerializer(UserSerializer):
         return obj.recipes.count()
 
 
-class TagSerializer(ModelSerializer):
+class TagSerializer(serializersModelSerializer):
     class Meta:
         model = Tag
         fields = '__all__'
@@ -94,6 +93,13 @@ class TagSerializer(ModelSerializer):
             data[attr] = value.sttrip(' #').upper()
 
         return data
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug')
 
 
 class IngredientSerializer(ModelSerializer):
