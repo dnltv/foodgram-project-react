@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from django.db import transaction
 from rest_framework import serializers, status
 from drf_extra_fields.fields import Base64ImageField
@@ -12,7 +11,6 @@ User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
@@ -58,12 +56,10 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """ Сериализатор просмотра модели Рецепт. """
-
     tags = TagSerializer(many=True)
     author = UserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
@@ -109,9 +105,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор обновления и добавления новых рецептов
-    """
     ingredients = RecipeIngredientCreateSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -124,21 +117,23 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError(
-                {'ingredients': 'Вы забыли про ингредиенты'},
+                {'ingredients': 'You forgot about ingredients'},
                 status.HTTP_400_BAD_REQUEST,
             )
         valid_list = []
         for ingredient in ingredients:
             if ingredient in valid_list:
                 raise serializers.ValidationError(
-                    {'ingredients': 'Ингредиенты должны быть уникальными'},
+                    {'ingredients': 'Ingredients must be unique'},
                     status.HTTP_400_BAD_REQUEST,
                 )
             valid_list.append(ingredient)
             if int(ingredient['amount']) < 1:
                 raise serializers.ValidationError(
-                    {'ingredients':
-                         'Количество ингердиента должно быть 1 или больше'},
+                    {
+                        'ingredients':
+                            'Amount of ingredients must be 1 or more'
+                     },
                     status.HTTP_400_BAD_REQUEST,
                 )
         return data
@@ -189,3 +184,36 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         exclude = ('pub_date',)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all()
+    )
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('recipe', 'owner'),
+                message='Recipe is already added to favorite',
+            )
+        ]
+
+
+class ShoppingCartSerializer(FavoriteSerializer):
+    class Meta(FavoriteSerializer.Meta):
+        model = ShoppingCart
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('recipe', 'owner'),
+                message='Recipe is already added to shopping cart',
+            )
+        ]
