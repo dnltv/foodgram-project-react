@@ -1,139 +1,50 @@
-from django.contrib.admin import ModelAdmin, TabularInline, display, register
-from django.core.handlers.wsgi import WSGIRequest
-from django.utils.html import format_html
-from django.utils.safestring import SafeString, mark_safe
-
-from recipes.forms import TagForm
-from recipes.models import (AmountIngredient, Carts, Favorites, Ingredient,
-                            Recipe, Tag)
-
-
-class IngredientInline(TabularInline):
-    model = AmountIngredient
-    extra = 2
-
-
-@register(AmountIngredient)
-class LinksAdmin(ModelAdmin):
-    pass
+from django.contrib.admin import ModelAdmin, TabularInline, register
+from .models import (RecipeIngredient, ShoppingCart, Favorite, Ingredient,
+                     Recipe, Tag)
 
 
 @register(Ingredient)
 class IngredientAdmin(ModelAdmin):
-    list_display = (
-        'name', 'measurement_unit',
-    )
-    search_fields = (
-        'name',
-    )
-    list_filter = (
-        'name',
-    )
-
-    save_on_top = True
+    search_fields = ('name',)
+    list_display = ('name', 'measurement_unit')
+    list_filter = ('name',)
     empty_value_display = '-empty-'
+
+
+class RecipeIngredientInline(TabularInline):
+    model = RecipeIngredient
+    min_num = 1
+    extra = 1
 
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    list_display = (
-        'name', 'author', 'get_image', 'count_favorites',
-    )
-    fields = (
-        ('name', 'cooking_time',),
-        ('author', 'tags',),
-        ('text',),
-        ('image',),
-    )
-    raw_id_fields = ('author', )
-    search_fields = (
-        'name', 'author__username', 'tags__name',
-    )
-    list_filter = (
-        'name', 'author__username', 'tags__name'
-    )
-
-    inlines = (IngredientInline,)
-    save_on_top = True
+    search_fields = ('name',)
+    list_display = ('pk', 'name', 'author')
+    list_filter = ('name', 'author', 'tags')
+    inlines = (RecipeIngredientInline,)
     empty_value_display = '-empty-'
 
-    def get_image(self, obj: Recipe) -> SafeString:
-        return mark_safe(f'<img src={obj.image.url} width="80" hieght="30"')
 
-    get_image.short_description = 'Image'
+@register(Favorite)
+class FavoriteAdmin(ModelAdmin):
+    search_fields = ('owner', 'recipe')
+    list_display = ('pk', 'owner', 'recipe')
+    list_filter = ('owner', 'recipe')
+    empty_value_display = '-empty-'
 
-    def count_favorites(self, obj: Recipe) -> int:
-        return obj.in_favorites.count()
 
-    count_favorites.short_description = 'Favorites'
+@register(ShoppingCart)
+class ShoppingCartAdmin(ModelAdmin):
+    search_fields = ('owner', 'recipe')
+    list_display = ('pk', 'owner', 'recipe')
+    list_filter = ('owner', 'recipe')
+    empty_value_display = '-empty-'
 
 
 @register(Tag)
 class TagAdmin(ModelAdmin):
-    form = TagForm
-    list_display = (
-        'name', 'slug', 'color_code',
-    )
-    search_fields = (
-        'name', 'color'
-    )
-
-    save_on_top = True
+    search_fields = ('name', 'color')
+    list_display = ('name', 'color')
+    list_filter = ('name', 'color')
     empty_value_display = '-empty-'
-
-    @display(description='Colored')
-    def color_code(self, obj: Tag):
-        return format_html(
-            '<span style="color: #{};">{}</span>',
-            obj.color[1:], obj.color
-        )
-
-    color_code.short_description = 'Color code of tag'
-
-
-@register(Favorites)
-class FavoriteAdmin(ModelAdmin):
-    list_display = (
-        'user', 'recipe', 'date_added'
-    )
-    search_fields = (
-        'user__username', 'recipe__name'
-    )
-
-    def has_change_permission(
-        self,
-        request: WSGIRequest,
-        obj: Favorites | None = None
-    ) -> bool:
-        return False
-
-    def has_delete_permission(
-        self,
-        request: WSGIRequest,
-        obj: Favorites | None = None
-    ) -> bool:
-        return False
-
-
-@register(Carts)
-class CardAdmin(ModelAdmin):
-    list_display = (
-        'user', 'recipe', 'date_added'
-    )
-    search_fields = (
-        'user__username', 'recipe__name'
-    )
-
-    def has_change_permission(
-        self,
-        request: WSGIRequest,
-        obj: Carts | None = None
-    ) -> bool:
-        return False
-
-    def has_delete_permission(
-        self,
-        request: WSGIRequest,
-        obj: Carts | None = None
-    ) -> bool:
-        return False

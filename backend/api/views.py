@@ -82,13 +82,12 @@ class FavoriteView(views.APIView):
 
 class ShoppingCartView(views.APIView):
 
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk=None):
-
-        user = request.user
+        owner = request.user
         data = {
-            'user': user.id,
+            'owner': owner.id,
             'recipe': pk,
         }
         context = {'request': request}
@@ -105,9 +104,9 @@ class ShoppingCartView(views.APIView):
         )
 
     def delete(self, request, pk):
-        user = request.user
+        owner = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
+        ShoppingCart.objects.filter(owner=owner, recipe=recipe).delete()
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )
