@@ -1,4 +1,4 @@
-rom typing import Optional
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.db.models.query import QuerySet
@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from .models import Follow
 from .serializers import SubscribeSerializer
+
 
 User = get_user_model()
 
