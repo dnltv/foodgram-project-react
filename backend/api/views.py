@@ -10,19 +10,18 @@ from rest_framework import views, status
 
 from api.permissions import AdminOwnerReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipeSerializer, RecipeCreateSerializer,
-                             ShortRecipeSerializer, ShoppingCartSerializer,
-                             TagSerializer, UserSubscribeSerializer)
+                               RecipeSerializer, RecipeCreateSerializer,
+                               ShoppingCartSerializer, TagSerializer)
 from api.limit import PaginationLimit
 from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import (ShoppingCart, Favorite, Ingredient, Recipe,
-                            RecipeIngredient, Tag)
+                              RecipeIngredient, Tag)
 
 
 User = get_user_model()
 
 
-class RecipesViewSet(ModelViewSet):
+class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (AdminOwnerReadOnly,)
     pagination_class = PaginationLimit
