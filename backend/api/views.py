@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from foodgram.settings import DATE_TIME_FORMAT
 from recipes.models import Carts, Favorites, Ingredient, Recipe, Tag
 from api.mixins import AddDelViewMixin
 from api.paginators import PageLimitPagination
@@ -20,9 +19,7 @@ from api.permissions import (AdminOrReadOnly, AuthorStaffOrReadOnly,
 from api.serializers import (IngredientSerializer, RecipeSerializer,
                              ShortRecipeSerializer, TagSerializer,
                              UserSubscribeSerializer)
-from core.limitations import Tuples, UrlQueries
-from core.funcs import incorrect_layout
-from users.models import Subscriptions
+from users.models import Follow
 
 
 User = get_user_model()

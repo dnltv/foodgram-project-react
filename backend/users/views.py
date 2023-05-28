@@ -5,8 +5,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from core.limit import PaginationLimit
-from core.mixins import CreateListRetrieveModelViewSet
+from api.limit import PaginationLimit
+from api.mixins import CreateListRetrieveModelViewSet
 from .models import Follow
 from .serializers import (PasswordSerializer, SubscribeSerializer,
                           UserRegistrationSerializer, UserSerializer)

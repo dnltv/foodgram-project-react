@@ -5,6 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             Tag, ShoppingCart)
+from ..users.serializers import UserSerializer
 
 
 User = get_user_model()
@@ -130,10 +131,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             valid_list.append(ingredient)
             if int(ingredient['amount']) < 1:
                 raise serializers.ValidationError(
-                    {
-                        'ingredients':
-                            'Amount of ingredients must be 1 or more'
-                     },
+                    {'ingredients': 'Amount of ingredients must be 1 or more'},
                     status.HTTP_400_BAD_REQUEST,
                 )
         return data
