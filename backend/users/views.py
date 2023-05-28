@@ -5,12 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from core.limit import PagionationLimit
+from core.limit import PaginationLimit
 from core.mixins import CreateListRetrieveModelViewSet
-from users.models import Follow
-from users.serializers import (PasswordSerializer, SubscriptionsSerializer,
-                               UserRegistrationSerializer, UserSerializer)
-from users.services import SubsriptionCreateDelete
+from .models import Follow
+from .serializers import (PasswordSerializer, SubscribeSerializer,
+                          UserRegistrationSerializer, UserSerializer)
+from .helpers import SubscribeCreateDelete
 
 
 User = get_user_model()
@@ -19,7 +19,7 @@ User = get_user_model()
 class UserViewSet(CreateListRetrieveModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = PagionationLimit
+    pagination_class = PaginationLimit
     lookup_url_kwarg = 'user_id'
 
     def get_queryset(self):
@@ -48,7 +48,7 @@ class UserViewSet(CreateListRetrieveModelViewSet):
         if self.action == 'set_password':
             return PasswordSerializer
         if self.action == 'subscriptions':
-            return SubscriptionsSerializer
+            return SubscribeSerializer
         return super().get_serializer_class()
 
     @action(detail=False)
@@ -89,8 +89,11 @@ class UserViewSet(CreateListRetrieveModelViewSet):
 
     @action(methods=('post', 'delete'), detail=True)
     def subscribe(self, request, *args, **kwargs):
-        subscription = SubsriptionCreateDelete(request, self.get_queryset(),
-                                               self.kwargs.get('user_id'))
+        subscription = SubscribeCreateDelete(
+            request,
+            self.get_queryset(),
+            self.kwargs.get('user_id')
+        )
         if request.method == 'POST':
             return subscription.create_subscribe()
         return subscription.delete_subscribe()
