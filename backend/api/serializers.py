@@ -41,7 +41,11 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
         source='ingredient',
         queryset=Ingredient.objects.all()
     )
-    amount = serializers.IntegerField(write_only=True, min_value=1)
+    amount = serializers.IntegerField(
+        write_only=True,
+        min_value=settings.MIN_VALUE,
+        max_value=settings.MAX_VALUE,
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -56,6 +60,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart')
+    cooking_time = serializers.IntegerField(
+        min_value=settings.MIN_VALUE,
+        max_value=settings.MAX_VALUE
+    )
 
     class Meta:
         model = Recipe
@@ -77,20 +85,18 @@ class RecipeSerializer(serializers.ModelSerializer):
         return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Favorite.objects.filter(
-            user=request.user, recipe_id=obj
-        ).exists()
+        if hasattr(obj, 'is_favorited'):
+            return obj.is_favorited
+        user = self.context.get('request').user
+        return (user.is_authenticated and
+                obj.favorites.filter(owner=user).exists())
 
     def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            user=request.user, recipe_id=obj
-        ).exists()
+        if hasattr(obj, 'is_in_shopping_cart'):
+            return obj.is_in_shopping_cart
+        user = self.context.get('request').user
+        return (user.is_authenticated and
+                obj.shopping_cart.filter(owner=user).exists())
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -109,17 +115,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 {'ingredients': 'You forgot about ingredients'},
                 status.HTTP_400_BAD_REQUEST,
             )
-        valid_list = []
+        valid_set = set()
         for ingredient in ingredients:
-            if ingredient in valid_list:
+            if ingredient in valid_set:
                 raise serializers.ValidationError(
                     {'ingredients': 'Ingredients must be unique'},
                     status.HTTP_400_BAD_REQUEST,
                 )
-            valid_list.append(ingredient)
-            if int(ingredient['amount']) < 1:
+            valid_set.add(ingredient)
+            if (int(ingredient['amount']) < settings.MIN_VALUE or
+                    int(ingredient['amount']) > settings.MAX_VALUE):
                 raise serializers.ValidationError(
-                    {'ingredients': 'Amount of ingredients must be 1 or more'},
+                    {
+                        'ingredients':
+                            'Amount of ingredients must be between 1 and 32000'
+                    },
                     status.HTTP_400_BAD_REQUEST,
                 )
         return data
@@ -198,7 +208,7 @@ class SubscribeSerializer(UserSerializer):
     def get_recipes(self, obj):
         queryset = obj.recipes.all()
         recipes_limit = self.context.get('recipes_limit')
-        if isinstance(recipes_limit, int) and recipes_limit > 0:
+        if isinstance(recipes_limit, int) and recipes_limit > settings.ZERO:
             recipes_limit = min(
                 recipes_limit,
                 settings.RECIPE_LIMIT_SUBSCRIPTIONS
