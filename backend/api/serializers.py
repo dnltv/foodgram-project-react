@@ -6,6 +6,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             Tag, ShoppingCart)
+from users.models import Follow
 from users.serializers import UserSerializer
 
 
@@ -195,27 +196,30 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class SubscribeSerializer(UserSerializer):
-    recipes = serializers.SerializerMethodField()
+class AddFollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follow
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('user', 'following'),
+                message="Can't subscribe twice",
+            )
+        ]
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    recipes = ShortRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
 
-    class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + (
-            'recipes',
-            'recipes_count',
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count'
         )
-
-    def get_recipes(self, obj):
-        queryset = obj.recipes.all()
-        recipes_limit = self.context.get('recipes_limit')
-        if isinstance(recipes_limit, int) and recipes_limit > settings.ZERO:
-            recipes_limit = min(
-                recipes_limit,
-                settings.RECIPE_LIMIT_SUBSCRIPTIONS
-            )
-            queryset = queryset[:recipes_limit]
-        return ShortRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

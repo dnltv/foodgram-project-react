@@ -42,12 +42,6 @@ class SubscribeCreateDelete:
         Follow.objects.filter(user=self.user, following=following).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _is_follow_exists(self, following: User) -> bool:
-        return Follow.objects.filter(
-            user=self.user,
-            following=following
-        ).exists()
-
     def _get_following_or_404(
             self,
             queryset: QuerySet = User.objects.all()
