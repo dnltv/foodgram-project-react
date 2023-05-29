@@ -56,6 +56,7 @@ class Follow(models.Model):
     )
 
     class Meta:
+        ordering = ('-id',)
         verbose_name = 'Follow'
         verbose_name_plural = 'Follows'
         constraints = (
