@@ -24,6 +24,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
 
@@ -52,12 +53,12 @@ class Tag(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'
-        ordering = ('name',)
 
     def __str__(self) -> str:
-        return self.name
+        return f'{self.name}'
 
 
 class RecipeQuerySet(models.QuerySet):
@@ -227,6 +228,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Favorite'
         verbose_name_plural = 'Favorites'
         constraints = (
