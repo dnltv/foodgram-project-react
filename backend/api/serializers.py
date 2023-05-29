@@ -198,6 +198,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 class SubscribeSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + (
@@ -218,6 +219,13 @@ class SubscribeSerializer(UserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
+
+    def get_is_subscribed(self, obj):
+        if hasattr(obj, 'is_subscribed'):
+            return obj.is_subscribed
+        user = self.context.get('request').user
+        return (user.is_authenticated and
+                obj.subscribed_by.filter(user=user).exists())
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

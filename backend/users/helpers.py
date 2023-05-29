@@ -33,29 +33,13 @@ class SubscribeCreateDelete:
 
     def create_subscribe(self) -> Response:
         following = self._get_following_or_404()
-        if self.user == following:
-            return Response(
-                {"Can't subscribe to yourself"},
-                status.HTTP_400_BAD_REQUEST,
-            )
-        if self._is_follow_exists(following):
-            return Response(
-                {"Can't subscribe twice"},
-                status.HTTP_400_BAD_REQUEST,
-            )
-
         Follow.objects.create(user=self.user, following=following)
         serializer = self.get_subscription_serializer()
         return Response(serializer.data, status.HTTP_201_CREATED)
 
     def delete_subscribe(self) -> Response:
         following = self._get_following_or_404()
-        if not self._is_follow_exists(following):
-            return Response(
-                {"Cant' unsubscribed, if you're not subscribed"},
-                status.HTTP_400_BAD_REQUEST,
-            )
-        Follow.objects.get(user=self.user, following=following).delete()
+        Follow.objects.filter(user=self.user, following=following).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _is_follow_exists(self, following: User) -> bool:
