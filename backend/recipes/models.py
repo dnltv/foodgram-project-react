@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Exists, OuterRef
@@ -98,7 +99,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Cooking time in minutes',
-        validators=(MinValueValidator(1),),
+        validators=(MinValueValidator(settings.MIN_VALUE),),
         help_text='Enter the cooking time in minutes'
     )
     pub_date = models.DateTimeField(
@@ -137,14 +138,14 @@ class Recipe(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return self.name
+        return f'{self.name}'
 
 
 class RecipeIngredient(models.Model):
     """A model representing ingredients for a specific recipe."""
     amount = models.PositiveIntegerField(
         verbose_name='Amount',
-        validators=(MinValueValidator(1), ),
+        validators=(MinValueValidator(settings.MIN_VALUE), ),
     )
     ingredient = models.ForeignKey(
         Ingredient,
