@@ -1,6 +1,6 @@
-from django.contrib.admin import register, ModelAdmin
+from django.contrib.admin import ModelAdmin, register
 
-from .models import User, Follow
+from .models import Follow, User
 
 
 @register(User)

@@ -7,9 +7,8 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .models import Follow
 from api.serializers import SubscribeSerializer
-
+from .models import Follow
 
 User = get_user_model()
 

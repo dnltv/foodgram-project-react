@@ -8,11 +8,10 @@ from rest_framework.response import Response
 from api.limit import PaginationLimit
 from api.mixins import CreateListRetrieveModelViewSet
 from api.serializers import SubscribeSerializer
-from .models import Follow
-from .serializers import (PasswordSerializer,
-                          UserRegistrationSerializer, UserSerializer)
 from .helpers import SubscribeCreateDelete
-
+from .models import Follow
+from .serializers import (PasswordSerializer, UserRegistrationSerializer,
+                          UserSerializer)
 
 User = get_user_model()
 

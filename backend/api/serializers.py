@@ -1,14 +1,13 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework import serializers, status
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers, status
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            Tag, ShoppingCart)
+                            ShoppingCart, Tag)
 from users.models import Follow
 from users.serializers import UserSerializer
-
 
 User = get_user_model()
 
@@ -89,15 +88,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'is_favorited'):
             return obj.is_favorited
         user = self.context.get('request').user
-        return (user.is_authenticated and
-                obj.favorites.filter(owner=user).exists())
+        return (user.is_authenticated
+                and obj.favorites.filter(owner=user).exists())
 
     def get_is_in_shopping_cart(self, obj):
         if hasattr(obj, 'is_in_shopping_cart'):
             return obj.is_in_shopping_cart
         user = self.context.get('request').user
-        return (user.is_authenticated and
-                obj.shopping_cart.filter(owner=user).exists())
+        return (user.is_authenticated
+                and obj.shopping_cart.filter(owner=user).exists())
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -124,8 +123,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                     status.HTTP_400_BAD_REQUEST,
                 )
             valid_set.add(ingredient)
-            if (int(ingredient['amount']) < settings.MIN_VALUE or
-                    int(ingredient['amount']) > settings.MAX_VALUE):
+            if (int(ingredient['amount']) < settings.MIN_VALUE
+                    or int(ingredient['amount']) > settings.MAX_VALUE):
                 raise serializers.ValidationError(
                     {
                         'ingredients':
@@ -228,8 +227,8 @@ class SubscribeSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'is_subscribed'):
             return obj.is_subscribed
         user = self.context.get('request').user
-        return (user.is_authenticated and
-                obj.subscribed_by.filter(user=user).exists())
+        return (user.is_authenticated
+                and obj.subscribed_by.filter(user=user).exists())
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
