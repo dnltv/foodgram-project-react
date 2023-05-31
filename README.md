@@ -12,27 +12,31 @@
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat&logo=GitHub%20actions&logoColor=5381ff&color=830f00)](https://github.com/features/actions)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat&logo=Yandex.Cloud&logoColor=5381ff&color=830f00)](https://cloud.yandex.ru/)
 ## Foodgram
-The project is available at the [link](http://130.193.51.100).
+The project is available at the [link](http://ip-address).
+To log in as a `superuser` enter: 
+```
+email: admin@mail.ru
+password: admin12345
+```
 
 ### Description
-The YaMDb project collects user reviews (`Review`) of works (`Title`).
-The works are divided into categories: "_Books_", "_Films_", "_Music_".
-The list of categories (`Category`) can be expanded (for example, you can add a category "*Fine Arts*" or "*Jewelry*").
-Cервис для публикаций и обмена рецептами.
+Service for __publishing__ and __sharing__ `Recipes`. 
 
-Авторизованные пользователи могут подписываться на понравившихся авторов, добавлять рецепты в избранное, сохранять их в список покупок и загружать список покупок. Неавторизованные пользователи могут зарегистрироваться, авторизоваться и просматривать рецепты других пользователей.
+Authorized `Users` can __subscribe__ to `Authors` they like, __add__ `Recipes` to `Favorites`, __save__ them to a `ShoppingCart` and __upload__ a shopping list.
+Unauthorized `Users` can __register__, __log in__, and __view__ other users' `Recipes`.
 
 
-## Stack
-- Python 3.7.7
-- Django 3.2.18
+
+
+### Technology Stack
+- Python 3.10
+- Django 4.2.1
 - Django REST Framework 3.14
-- Полный список зависимостей Python можно найти по пути `backend/requirements.txt`
 - PostgreSQL 13.0
 - Nginx 1.21.3
-- Yandex.Cloud
-- Docker
 - Docker Compose
+
+Full list in the file **requirements.txt**
 
 ### Preparing for launch
 - Clone the repository and go to it on the command line.
