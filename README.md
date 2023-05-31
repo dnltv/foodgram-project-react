@@ -11,8 +11,8 @@
 [![Docker Hub](https://img.shields.io/badge/-Docker%20Hub-464646?style=flat&logo=Docker&logoColor=5381ff&color=830f00)](https://www.docker.com/products/docker-hub)
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat&logo=GitHub%20actions&logoColor=5381ff&color=830f00)](https://github.com/features/actions)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat&logo=Yandex.Cloud&logoColor=5381ff&color=830f00)](https://cloud.yandex.ru/)
-## Foodgram
-The project is available at the [link](http://ip-address).
+### Foodgram
+The project is available at the [link](http://84.201.130.26).
 To log in as a `superuser` enter: 
 ```
 email: admin@mail.ru
@@ -88,7 +88,7 @@ DB_HOST=db
 DB_PORT=5432
 ```
 
-[Project](http://ip-address)
+[Project link](http://84.201.130.26)
 
 
 ### Workflow
