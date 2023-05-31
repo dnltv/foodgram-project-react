@@ -11,7 +11,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10.0
 
       - name: Install dependencies
         run: |
@@ -74,6 +74,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            echo DJANGO_TOKEN=${{ secrets.DJANGO_TOKEN }} >> .env
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
             sudo docker compose up -d

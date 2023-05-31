@@ -12,7 +12,7 @@
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat&logo=GitHub%20actions&logoColor=5381ff&color=830f00)](https://github.com/features/actions)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat&logo=Yandex.Cloud&logoColor=5381ff&color=830f00)](https://cloud.yandex.ru/)
 ### Foodgram
-The project is available at the [link](http://84.201.130.26).
+The project is available at the [link](http://84.201.156.54).
 To log in as a `superuser` enter: 
 ```
 email: admin@mail.ru
@@ -88,7 +88,7 @@ DB_HOST=db
 DB_PORT=5432
 ```
 
-[Project link](http://84.201.130.26)
+[Project link](http://84.201.156.54)
 
 
 ### Workflow
@@ -132,7 +132,7 @@ sudo sh get-docker.sh
 ```
 - Copy `nginx/default.conf` to server from your local machine (Command from the root directory of the project).
 ```bash
-scp -r infra/nginx/ <username>@<host>:/home/<username>/
+scp -r infra/nginx.conf <username>@<host>:/home/<username>/
 ```
 - Copy `docker-compose.yaml` to server from your local machine (Command from the root directory of the project).
 ```bash
