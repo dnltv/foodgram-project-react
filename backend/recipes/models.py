@@ -7,7 +7,6 @@ from django.db import models
 from django.db.models import Exists, OuterRef
 from django.utils.text import slugify
 
-
 User = get_user_model()
 
 

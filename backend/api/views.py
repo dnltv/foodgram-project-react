@@ -17,7 +17,6 @@ from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
-
 User = get_user_model()
 
 
