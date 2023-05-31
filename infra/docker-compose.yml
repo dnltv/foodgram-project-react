@@ -9,7 +9,7 @@ services:
     env_file:
       - ./.env
   backend:
-    image: dnltv/foodgram_backend:v.1
+    image: dnltv/foodgram_backend:latest
     restart: always
     volumes:
       - backend_static:/app/static/
@@ -19,7 +19,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: dnltv/foodgram_frontend:v.1
+    image: dnltv/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
