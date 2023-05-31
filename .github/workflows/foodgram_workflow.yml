@@ -67,6 +67,7 @@ jobs:
             docker compose down -v 
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+            rm .env
             touch .env
             echo DJANGO_TOKEN=${{ secrets.DJANGO_TOKEN }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env

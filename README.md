@@ -153,13 +153,13 @@ sudo docker compose exec backend python manage.py createsuperuser
 ```
 - If necessary, fill in the database with test data with the command:
 ```bash
-sudo docker compose exec backend python manage.py json_to_db tags.json
+sudo docker compose exec backend python manage.py json_to_db --path 'recipes/data/tags.json'
 ```
 ```bash
-sudo docker compose exec backend python manage.py json_to_db ingredients.json
+sudo docker compose exec backend python manage.py json_to_db --path 'recipes/data/ingredients.json'
 ```
 ```bash
-sudo docker compose exec backend python manage.py json_to_db users.json
+sudo docker compose exec backend python manage.py json_to_db --path 'recipes/data/users.json'
 ```
 
 - Stop containers:
