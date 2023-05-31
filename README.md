@@ -136,24 +136,21 @@ scp -r infra/nginx/ <username>@<host>:/home/<username>/
 ```
 - Copy `docker-compose.yaml` to server from your local machine (Command from the root directory of the project).
 ```bash
-scp infra/docker-compose.yaml <username>@<host>:/home/<username>/
+scp infra/docker-compose.yml <username>@<host>:/home/<username>/
 ```
 
 - Perform migrations on server:
 ```bash
 sudo docker compose exec backend python manage.py migrate
 ```
-
-- Create a `superuser`:
-```bash
-sudo docker compose exec backend python manage.py createsuperuser
-```
-
 - Collect project static:
 ```bash
 sudo docker compose exec backend python manage.py collectstatic --no-input
 ```
-
+- Create a `superuser`:
+```bash
+sudo docker compose exec backend python manage.py createsuperuser
+```
 - If necessary, fill in the database with test data with the command:
 ```bash
 sudo docker compose exec backend python manage.py json_to_db tags.json
