@@ -1,4 +1,4 @@
-[![Django-app workflow](https://github.com/dnltv/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)](https://github.com/dnltv/yamdb_final/actions/workflows/yamdb_workflow.yml)
+[![Django-app workflow](https://github.com/dnltv/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/dnltv/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat&logo=Python&logoColor=5381ff&color=830f00)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/-Django-464646?style=flat&logo=Django&logoColor=5381ff&color=830f00)](https://www.djangoproject.com/)
 [![Django REST Framework](https://img.shields.io/badge/-Django%20REST%20Framework-464646?style=flat&logo=Django%20REST%20Framework&logoColor=56C0C0&color=830f00)](https://www.django-rest-framework.org/)
