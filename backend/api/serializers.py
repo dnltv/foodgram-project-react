@@ -188,10 +188,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')},
         ).data
 
-    # @property
-    # def data(self):
-    #     return RecipeSerializer(self.instance, context=self.context).data
-
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
