@@ -9,7 +9,7 @@ services:
     env_file:
       - ./.env
   backend:
-    image: dnltv/foodgram_backend:v.3
+    image: dnltv/foodgram_backend:v.4
     restart: always
     volumes:
       - backend_static:/app/static_backend/
