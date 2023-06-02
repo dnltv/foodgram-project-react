@@ -9,21 +9,21 @@ services:
     env_file:
       - ./.env
   backend:
-    image: dnltv/foodgram_backend:v.1
+    image: dnltv/foodgram_backend:v.3
     restart: always
     volumes:
-      - backend_static:/app/static/
+      - backend_static:/app/static_backend/
       - backend_media:/app/media/
     depends_on:
       - db
     env_file:
       - ./.env
   frontend:
-    image: ioann7/foodgram_frontend:latest
+    image: dnltv/foodgram_frontend:v.3
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
-      - backend
+      - db
   nginx:
     image: nginx:1.21.3-alpine
     ports:
@@ -32,7 +32,7 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      - backend_static:/var/html/static/
+      - backend_static:/var/html/static_backend/
       - backend_media:/var/html/media/
     restart: always
     depends_on:
