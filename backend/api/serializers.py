@@ -106,7 +106,18 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
     )
     image = Base64ImageField()
-    author = UserSerializer(required=False)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'ingredients',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
 
     def validate_ingredients(self, data):
         ingredients = self.initial_data.get('ingredients')
@@ -177,22 +188,38 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')},
         ).data
 
-    class Meta:
-        model = Recipe
-        exclude = ('pub_date',)
+    # @property
+    # def data(self):
+    #     return RecipeSerializer(self.instance, context=self.context).data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
-    author = UserSerializer(read_only=True)
-    ingredients = RecipeIngredientSerializer(
-        source='ingredient_amount',
-        many=True
-    )
-
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscribeSerializer(UserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
+            'recipes',
+            'recipes_count',
+        )
+
+    def get_recipes(self, obj):
+        queryset = obj.recipes.all()
+        recipes_limit = self.context.get('recipes_limit')
+        if isinstance(recipes_limit, int) and recipes_limit > settings.ZERO:
+            recipes_limit = min(recipes_limit,
+                                settings.RECIPE_LIMIT_SUBSCRIBE)
+            queryset = queryset[:recipes_limit]
+        return ShortRecipeSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
 
 
 class AddFollowSerializer(serializers.ModelSerializer):
@@ -206,29 +233,6 @@ class AddFollowSerializer(serializers.ModelSerializer):
                 message="Can't subscribe twice",
             )
         ]
-
-
-class SubscribeSerializer(serializers.ModelSerializer):
-    recipes = ShortRecipeSerializer(many=True, read_only=True)
-    recipes_count = serializers.SerializerMethodField()
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name',
-            'is_subscribed', 'recipes', 'recipes_count'
-        )
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-    def get_is_subscribed(self, obj):
-        if hasattr(obj, 'is_subscribed'):
-            return obj.is_subscribed
-        user = self.context.get('request').user
-        return (user.is_authenticated
-                and obj.subscribed_by.filter(user=user).exists())
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
