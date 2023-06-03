@@ -36,11 +36,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
-    recipe = serializers.PrimaryKeyRelatedField(read_only=True)
-    id = serializers.PrimaryKeyRelatedField(
-        source='ingredient',
-        queryset=Ingredient.objects.all()
-    )
+    id = serializers.PrimaryKeyRelatedField(source='ingredient.pk',
+                                            queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(
         write_only=True,
         min_value=settings.MIN_VALUE,
@@ -49,13 +46,14 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ('recipe', 'id', 'amount')
+        fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientSerializer(source='recipe_ingredient',
+                                             many=True)
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
@@ -79,10 +77,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
-
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredient.objects.filter(recipe=obj)
-        return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         if hasattr(obj, 'is_favorited'):
@@ -119,38 +113,41 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    def validate_ingredients(self, data):
-        ingredients = self.initial_data.get('ingredients')
-        if not ingredients:
+    def validate_ingredients(self, ingredients):
+        unique_ingredients_id = set(
+            [ingr['ingredient']['pk'] for ingr in ingredients]
+        )
+        if len(unique_ingredients_id) != len(ingredients):
             raise serializers.ValidationError(
-                {'ingredients': 'You forgot about ingredients'},
-                status.HTTP_400_BAD_REQUEST,
+                'Ingredients must be unique'
             )
-        valid_set = set()
-        for ingredient in ingredients:
-            if ingredient in valid_set:
-                raise serializers.ValidationError(
-                    {'ingredients': 'Ingredients must be unique'},
-                    status.HTTP_400_BAD_REQUEST,
-                )
-            valid_set.add(ingredient)
-            if (int(ingredient['amount']) < settings.MIN_VALUE
-                    or int(ingredient['amount']) > settings.MAX_VALUE):
-                raise serializers.ValidationError(
-                    {
-                        'ingredients':
-                            'Amount of ingredients must be between 1 and 32000'
-                    },
-                    status.HTTP_400_BAD_REQUEST,
-                )
-        return data
+        return ingredients
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self._create_data(ingredients, recipe)
+        return recipe
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if 'tags' in validated_data:
+            instance.tags.set(validated_data.pop('tags'))
+        if 'ingredients' in validated_data:
+            RecipeIngredient.objects.filter(recipe=instance).delete()
+            ingredients_data = validated_data.pop('ingredients')
+            self._create_data(ingredients_data, instance)
+        return super().update(instance, validated_data)
 
     @staticmethod
     def _create_data(ingredients, obj):
         create_ingredients = [
             RecipeIngredient(
                 recipe=obj,
-                ingredient=ingredient['ingredient'],
+                ingredient=ingredient['ingredient']['pk'],
                 amount=ingredient['amount'],
             )
             for ingredient in ingredients
@@ -160,33 +157,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             create_ingredients
         )
 
-    @transaction.atomic
-    def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        self._create_data(ingredients, recipe)
-
-        return recipe
-
-    @transaction.atomic
-    def update(self, instance, validated_data):
-        ingredients = validated_data.pop('ingredients', None)
-        tags = validated_data.pop('tags', None)
-        if tags is not None:
-            instance.tags.set(tags)
-        if ingredients is not None:
-            instance.ingredients.clear()
-        self._create_data(ingredients, instance)
-
-        return super().update(instance, validated_data)
-
-    def to_representation(self, instance):
-        return ShortRecipeSerializer(
-            instance,
-            context={'request': self.context.get('request')},
-        ).data
+    @property
+    def data(self):
+        return RecipeSerializer(self.instance, context=self.context).data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -216,49 +189,3 @@ class SubscribeSerializer(UserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
-
-class AddFollowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Follow
-        fields = '__all__'
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=model.objects.all(),
-                fields=('user', 'following'),
-                message="Can't subscribe twice",
-            )
-        ]
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    recipe = serializers.PrimaryKeyRelatedField(
-        queryset=Recipe.objects.all()
-    )
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all()
-    )
-
-    class Meta:
-        model = Favorite
-        fields = '__all__'
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=model.objects.all(),
-                fields=('recipe', 'owner'),
-                message='Recipe is already added to favorite',
-            )
-        ]
-
-
-class ShoppingCartSerializer(FavoriteSerializer):
-    class Meta(FavoriteSerializer.Meta):
-        model = ShoppingCart
-        fields = '__all__'
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=model.objects.all(),
-                fields=('recipe', 'owner'),
-                message='Recipe is already added to shopping cart',
-            )
-        ]

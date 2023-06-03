@@ -1,13 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.db.models import F, Sum, Exists, Subquery, OuterRef, Prefetch
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.db.models import Exists, Subquery, OuterRef, Prefetch
 from django_filters import rest_framework
-from rest_framework import status, views
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.limit import PaginationLimit
@@ -26,7 +22,6 @@ User = get_user_model()
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (AdminOwnerReadOnly,)
     pagination_class = PaginationLimit
     filter_backends = (rest_framework.DjangoFilterBackend,)
     filterset_class = RecipeFilter
