@@ -139,23 +139,23 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ],
+    # 'DEFAULT_FILTER_BACKENDS': [
+    #     'django_filters.rest_framework.DjangoFilterBackend'
+    # ],
 }
 
-# DJOSER = {
-#     'SERIALIZERS': {
-#         'user_create': 'users.serializers.UserRegistrationSerializer',
-#         'user': 'users.serializers.UserSerializer',
-#         'current_user': 'users.serializers.UserSerializer',
-#     },
-#     'PERMISSIONS': {
-#         'user_list': ['rest_framework.permissions.AllowAny'],
-#         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
-#     },
-#     'HIDE_USERS': False,
-#     'USER_ID_FIELD': 'id',
-# }
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.UserRegistrationSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly']
+    },
+    'HIDE_USERS': False,
+    'USER_ID_FIELD': 'id',
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

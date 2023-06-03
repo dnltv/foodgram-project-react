@@ -2,11 +2,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers, status
+from rest_framework import serializers
 
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from users.models import Follow
 from users.serializers import UserSerializer
 
 User = get_user_model()
@@ -38,11 +37,11 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(source='ingredient.pk',
                                             queryset=Ingredient.objects.all())
-    # amount = serializers.IntegerField(
-    #     write_only=True,
-    #     min_value=settings.MIN_VALUE,
-    #     max_value=settings.MAX_VALUE,
-    # )
+    amount = serializers.IntegerField(
+        write_only=True,
+        min_value=settings.MIN_VALUE,
+        max_value=settings.MAX_VALUE,
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -58,10 +57,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart')
-    # cooking_time = serializers.IntegerField(
-    #     min_value=settings.MIN_VALUE,
-    #     max_value=settings.MAX_VALUE
-    # )
+    cooking_time = serializers.IntegerField(
+        min_value=settings.MIN_VALUE,
+        max_value=settings.MAX_VALUE
+    )
 
     class Meta:
         model = Recipe

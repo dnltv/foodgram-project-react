@@ -7,7 +7,6 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.limit import PaginationLimit
-from api.permissions import AdminOwnerReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeCreateSerializer, RecipeSerializer,
                              ShoppingCartSerializer, TagSerializer)
@@ -37,8 +36,10 @@ class RecipeViewSet(ModelViewSet):
                 ))
             ).annotate(
                 is_in_shopping_cart=Exists(Subquery(
-                    ShoppingCart.objects.filter(owner=user, recipe=OuterRef('pk'))
-                ))
+                    ShoppingCart.objects.filter(
+                        owner=user,
+                        recipe=OuterRef('pk')
+                    )))
             )
             user_queryset = user_queryset.annotate(
                 is_subscribed=Exists(Subquery(
@@ -115,4 +116,3 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (AdminOwnerReadOnly,)
