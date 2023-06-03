@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import (Case, When, Value, IntegerField, Exists,
                               Subquery, OuterRef)
 from django.db.models.functions import Lower
@@ -17,9 +18,9 @@ class IngredientFilter(rest_framework.FilterSet):
         icontains_lookup = {f'{name}__icontains': value}
         return queryset.filter(**icontains_lookup).annotate(
             custom_ordering=Case(
-                When(**istartswith_lookup, then=Value(1)),
-                When(**icontains_lookup, then=Value(2)),
-                default=Value(3),
+                When(**istartswith_lookup, then=Value(settings.ONE)),
+                When(**icontains_lookup, then=Value(settings.TWO)),
+                default=Value(settings.THREE),
                 output_field=IntegerField(),
             )
         ).order_by('custom_ordering', Lower('name'))

@@ -8,7 +8,7 @@ SECRET_KEY = os.getenv(
     default='django-insecure-x9$q82072np-88($=^j$a&9_t_1nthic)8)!g6m6=-4l@a!l90'
 )
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -122,6 +122,9 @@ MAX_PAGE_PAGINATION = 100
 MIN_VALUE = 1
 MAX_VALUE = 32000
 ZERO = 0
+ONE = 1
+TWO = 2
+THREE = 3
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
