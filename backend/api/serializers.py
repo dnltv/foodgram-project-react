@@ -31,18 +31,18 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         source='ingredient.measurement_unit')
 
     class Meta:
-        fields = ('id', 'name', 'measurement_unit', 'amount')
         model = RecipeIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(source='ingredient.pk',
                                             queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField(
-        write_only=True,
-        min_value=settings.MIN_VALUE,
-        max_value=settings.MAX_VALUE,
-    )
+    # amount = serializers.IntegerField(
+    #     write_only=True,
+    #     min_value=settings.MIN_VALUE,
+    #     max_value=settings.MAX_VALUE,
+    # )
 
     class Meta:
         model = RecipeIngredient
@@ -58,10 +58,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart')
-    cooking_time = serializers.IntegerField(
-        min_value=settings.MIN_VALUE,
-        max_value=settings.MAX_VALUE
-    )
+    # cooking_time = serializers.IntegerField(
+    #     min_value=settings.MIN_VALUE,
+    #     max_value=settings.MAX_VALUE
+    # )
 
     class Meta:
         model = Recipe
@@ -115,7 +115,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, ingredients):
         unique_ingredients_id = set(
-            [ingr['ingredient']['pk'] for ingr in ingredients]
+            [ingredient['ingredient']['pk'] for ingredient in ingredients]
         )
         if len(unique_ingredients_id) != len(ingredients):
             raise serializers.ValidationError(
@@ -143,10 +143,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
     @staticmethod
-    def _create_data(ingredients, obj):
+    def _create_data(ingredients, recipe):
         create_ingredients = [
             RecipeIngredient(
-                recipe=obj,
+                recipe=recipe,
                 ingredient=ingredient['ingredient']['pk'],
                 amount=ingredient['amount'],
             )

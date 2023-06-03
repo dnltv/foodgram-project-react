@@ -61,20 +61,20 @@ class Tag(models.Model):
         return f'{self.name}'
 
 
-class RecipeQuerySet(models.QuerySet):
-    def add_user_annotation(self, user_id: Optional[int]):
-        return self.annotate(
-            is_favorited=Exists(
-                Favorite.objects.filter(
-                    user_id=user_id, recipe__pk=OuterRef('pk')
-                )
-            ),
-            is_in_shopping_cart=Exists(
-                ShoppingCart.objects.filter(
-                    user_id=user_id, recipe__pk=OuterRef('pk')
-                )
-            ),
-        )
+# class RecipeQuerySet(models.QuerySet):
+#     def add_user_annotation(self, user_id: Optional[int]):
+#         return self.annotate(
+#             is_favorited=Exists(
+#                 Favorite.objects.filter(
+#                     user_id=user_id, recipe__pk=OuterRef('pk')
+#                 )
+#             ),
+#             is_in_shopping_cart=Exists(
+#                 ShoppingCart.objects.filter(
+#                     user_id=user_id, recipe__pk=OuterRef('pk')
+#                 )
+#             ),
+#         )
 
 
 class Recipe(models.Model):
@@ -119,22 +119,17 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         verbose_name='Image of the recipe',
-        upload_to='recipes/images',
+        upload_to='recipes/images/',
         help_text='Attach a photo of the recipe',
         null=True,
         default=None,
     )
-    objects = RecipeQuerySet.as_manager()
+    # objects = RecipeQuerySet.as_manager()
 
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
-
-    def save(self, *args, **kwargs):
-        if not kwargs.pop('from_admin', False):
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'{self.name}'
@@ -150,20 +145,25 @@ class RecipeIngredient(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ingredient',
-        related_name='ingredient_amount',
+        related_name='recipe_ingredient',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Recipe',
-        related_name='ingredient_amount',
+        related_name='recipe_ingredient',
     )
 
     class Meta:
         ordering = ('recipe__name',)
         verbose_name = 'Ingredient in recipe'
         verbose_name_plural = 'Ingredients in recipes'
-        unique_together = ('ingredient', 'recipe')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient'),
+                name='unique_recipe_ingredient',
+            ),
+        )
 
     def __str__(self):
         return f'{self.recipe}: {self.ingredient} in amount: {self.amount}'
