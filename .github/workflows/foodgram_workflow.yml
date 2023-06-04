@@ -43,7 +43,7 @@
 #        with:
 #          push: true
 #          context: ./backend/
-#          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v.4
+#          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v.2
 #      - name: Push frontend to Docker Hub
 #        uses: docker/build-push-action@v2
 #        with:
@@ -75,7 +75,7 @@
 #            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
 #            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
 #            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-#            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v.4
+#            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v.2
 #            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v.3
 #            sudo docker-compose up -d
 #            sudo docker-compose exec -T backend python manage.py migrate
