@@ -1,10 +1,10 @@
 from django.conf import settings
-from django.db.models import (Case, When, Value, IntegerField, Exists,
-                              Subquery, OuterRef)
+from django.db.models import (Case, Exists, IntegerField, OuterRef, Subquery,
+                              Value, When)
 from django.db.models.functions import Lower
 from django_filters import rest_framework
 
-from .models import Ingredient, Recipe, Favorite, ShoppingCart
+from .models import Favorite, Ingredient, Recipe, ShoppingCart
 
 
 class IngredientFilter(rest_framework.FilterSet):

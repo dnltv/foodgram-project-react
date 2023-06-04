@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, Subquery, OuterRef, Prefetch
+from django.db.models import Exists, OuterRef, Prefetch, Subquery
 from django_filters import rest_framework
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
@@ -10,9 +10,8 @@ from api.limit import PaginationLimit
 from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
                              RecipeSerializer, TagSerializer)
 from recipes.filters import IngredientFilter, RecipeFilter
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from recipes.helpers import FavoriteCreateDelete, ShoppingCartToPDF
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from users.models import Follow
 
 User = get_user_model()
