@@ -12,7 +12,7 @@
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat&logo=GitHub%20actions&logoColor=5381ff&color=830f00)](https://github.com/features/actions)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat&logo=Yandex.Cloud&logoColor=5381ff&color=830f00)](https://cloud.yandex.ru/)
 ### Foodgram
-The project is available at the [link](http://84.201.156.54).
+The project is available at the [link](http://84.252.128.110).
 To log in as a `superuser` enter: 
 ```
 email: admin@mail.ru
@@ -29,8 +29,8 @@ Unauthorized `Users` can __register__, __log in__, and __view__ other users' `Re
 
 
 ### Technology Stack
-- Python 3.10
-- Django 4.2.1
+- Python 3.9
+- Django 3.2.18
 - Django REST Framework 3.14
 - PostgreSQL 13.0
 - Nginx 1.21.3
@@ -88,7 +88,7 @@ DB_HOST=db
 DB_PORT=5432
 ```
 
-[Project link](http://84.201.156.54)
+[Project link](http://84.252.128.110)
 
 
 ### Workflow
@@ -109,13 +109,13 @@ PASSPHRASE - the passphrase for the ssh key
 DB_ENGINE - django.db.backends.postgresql
 DB_HOST - db
 DB_PORT - 5432
-SECRET_KEY - django application secret key
-ALLOWED_HOSTS - list of allowed hosts
-TELEGRAM_TO - the id of your telegram account (you can find out from @userinfobot, the /start command)
-TELEGRAM_TOKEN - bot token (you can get a token from @BotFather, /token, bot name)
 DB_NAME - postgres (by default)
 POSTGRES_USER - postgres (by default)
 POSTGRES_PASSWORD - postgres (by default)
+DJANGO_TOKEN - django application secret key
+ALLOWED_HOSTS - list of allowed hosts
+TELEGRAM_TO - the id of your telegram account (you can find out from @userinfobot, the /start command)
+TELEGRAM_TOKEN - bot token (you can get a token from @BotFather, /token, bot name)
 ```
 
 ### Preparing Ubuntu server
