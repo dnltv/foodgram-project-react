@@ -12,7 +12,8 @@ services:
       - 5432:5432
 
   backend:
-    image: dnltv/foodgram_backend:v.1
+    #image: dnltv/foodgram_backend:v.1
+    build: ../backend/
     restart: always
     volumes:
       - backend_static:/app/static_backend/
@@ -39,7 +40,6 @@ services:
       - backend_media:/var/html/media/
     restart: always
     depends_on:
-      - backend
       - frontend
 
 volumes:

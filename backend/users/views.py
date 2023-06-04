@@ -39,8 +39,8 @@ class UserViewSet(CreateListRetrieveModelViewSet):
     def get_permissions(self):
         if self.action in ('retrieve', 'me', 'set_password',
                            'subscriptions', 'subscribe',):
-            return (IsAuthenticated(),)
-        return (AllowAny(),)
+            return IsAuthenticated(),
+        return AllowAny(),
 
     def get_serializer_class(self):
         if self.action == 'create':

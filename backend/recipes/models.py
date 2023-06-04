@@ -1,11 +1,7 @@
-from typing import Optional
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Exists, OuterRef
-from django.utils.text import slugify
 
 User = get_user_model()
 
@@ -61,22 +57,6 @@ class Tag(models.Model):
         return f'{self.name}'
 
 
-# class RecipeQuerySet(models.QuerySet):
-#     def add_user_annotation(self, user_id: Optional[int]):
-#         return self.annotate(
-#             is_favorited=Exists(
-#                 Favorite.objects.filter(
-#                     user_id=user_id, recipe__pk=OuterRef('pk')
-#                 )
-#             ),
-#             is_in_shopping_cart=Exists(
-#                 ShoppingCart.objects.filter(
-#                     user_id=user_id, recipe__pk=OuterRef('pk')
-#                 )
-#             ),
-#         )
-
-
 class Recipe(models.Model):
     """A model representing recipes."""
     author = models.ForeignKey(
@@ -88,13 +68,6 @@ class Recipe(models.Model):
     name = models.CharField(
         verbose_name='Name of the recipe',
         max_length=200,
-    )
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        verbose_name='Ingredients of the recipe',
-        related_name='ingredients',
-        through='RecipeIngredient',
-        through_fields=('recipe', 'ingredient'),
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Cooking time in minutes',
@@ -124,7 +97,6 @@ class Recipe(models.Model):
         null=True,
         default=None,
     )
-    # objects = RecipeQuerySet.as_manager()
 
     class Meta:
         ordering = ('-pub_date',)
@@ -175,7 +147,7 @@ class ShoppingCart(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Recipe in the shopping cart',
-        related_name='shopping_cart',
+        related_name='shop_cart',
         help_text='Select the recipe to add to shopping cart',
     )
     owner = models.ForeignKey(
@@ -234,7 +206,7 @@ class Favorite(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('recipe', 'owner'),
-                name='unique_favorite_recipe_owner'
+                name='unique_favorite'
             ),
         )
 

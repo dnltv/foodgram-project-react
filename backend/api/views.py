@@ -7,9 +7,8 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.limit import PaginationLimit
-from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipeCreateSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, TagSerializer)
+from api.serializers import (IngredientSerializer, RecipeCreateSerializer,
+                             RecipeSerializer, TagSerializer)
 from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
@@ -21,9 +20,10 @@ User = get_user_model()
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    pagination_class = PaginationLimit
     filter_backends = (rest_framework.DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    lookup_url_kwarg = 'recipe_id'
+    pagination_class = PaginationLimit
 
     def get_queryset(self):
         user = self.request.user
@@ -69,8 +69,8 @@ class RecipeViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ('favorite', 'shopping_cart',
                            'download_shopping_cart',):
-            return (IsAuthenticated(),)
-        return (IsAuthenticatedOrReadOnly(),)
+            return IsAuthenticated(),
+        return IsAuthenticatedOrReadOnly(),
 
     @action(methods=('post', 'delete',), detail=True)
     def favorite(self, request, *args, **kwargs):

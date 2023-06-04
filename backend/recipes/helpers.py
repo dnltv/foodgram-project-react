@@ -79,7 +79,7 @@ class ShoppingCartToPDF:
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(total_amount=Sum('amount'))
-        template = get_template('recipes/shopping_cart.html')
+        template = get_template('blank/cart_template.html')
         html = template.render({'unique_ingredients': unique_ingredients})
         options = {
             'page-size': 'Letter',
@@ -87,5 +87,5 @@ class ShoppingCartToPDF:
         }
         pdf = pdfkit.from_string(html, False, options)
         buffer = BytesIO(pdf)
-        return FileResponse(buffer, filename='shopping_cart.pdf',
+        return FileResponse(buffer, filename='shopping_list.pdf',
                             content_type='application/pdf')
