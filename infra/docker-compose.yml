@@ -12,7 +12,7 @@ services:
       - 5432:5432
 
   backend:
-    image: dnltv/foodgram_backend:v.2
+    image: dnltv/foodgram_backend:latest
     restart: always
     volumes:
       - backend_static:/app/static_backend/
@@ -22,7 +22,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: dnltv/foodgram_frontend:v.3
+    image: dnltv/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
